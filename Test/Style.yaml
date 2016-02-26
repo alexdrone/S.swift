@@ -1,0 +1,20 @@
+Color:
+  red:
+    "idiom = phone and width < 300": "#ffcc00"
+    "idiom = phone and width > 300": "#ffcc00"
+    "default": "#ffcc00"
+  blue: "#aabbcc"
+
+Typography:
+  small: Font("System", 12)
+  medium: Font("System", 18)
+
+DefaultButton < Button:
+  margin: 12
+  opaque: false
+  color: $Color.blue
+
+Button:
+  margin: 12
+  opaque: true
+  font: $Typography.small
