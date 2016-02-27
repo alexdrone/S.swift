@@ -32,6 +32,9 @@ internal enum RhsValue {
     ///A color value
     case Color(color: Rhs.Color)
     
+    ///A image
+    case Image(image: String)
+    
     ///A redirection to another value
     case Redirect(redirection: RhsRedirectValue)
     
@@ -102,6 +105,10 @@ internal enum RhsValue {
             assert(components.count == 1)
             return .Color(color: Rhs.Color(rgba: "#\(components[0])"))
             
+        } else if let components = argumentsFromString("image", string: string) {
+            assert(components.count == 1)
+            return .Image(image: components[0])
+                
         } else if let components = argumentsFromString("redirect", string: string) {
             assert(components.count == 1)
             return .Redirect(redirection: RhsRedirectValue(redirection: components[0], type: "Any"))
@@ -119,6 +126,7 @@ internal enum RhsValue {
         case .Boolean(_): return "Bool"
         case .Font(_): return "UIFont"
         case .Color(_): return "UIColor"
+        case .Image(_): return "UIImage"
         case .Redirect(let r): return r.type
         case .Hash(let hash): for (_, rhs) in hash { return rhs.returnValue() }
         }
@@ -148,6 +156,7 @@ extension RhsValue: Generatable {
         case .Boolean(let boolean): return "\n\t\t\treturn \(boolean)"
         case .Font(let font): return "\n\t\t\treturn UIFont(name: \(font.fontName), size: \(font.fontSize))!"
         case .Color(let color): return "\n\t\t\treturn UIColor(red: \(color.red), green: \(color.green), blue: \(color.blue), alpha: \(color.alpha))"
+        case .Image(let image): return "\n\t\t\treturn UIImage(named: \"\(image)\")"
         case .Redirect(let redirection): return "\n\t\t\treturn \(redirection.redirection)WithTraitCollection(traitCollection)"
         case .Hash(let hash):
             var string = ""
@@ -300,7 +309,7 @@ internal class Stylesheet {
     private func resolveRedirectedType(redirection: String) -> String {
         
         let components = redirection.componentsSeparatedByString(".")
-        assert(components.count == 2)
+        assert(components.count == 2, "Redirect \(redirection) invalid")
         
         let style = self.styles.filter() { return $0.name == components[0]}.first!
         let property = style.properties.filter() { return $0.key == components[1] }.first!

@@ -1,0 +1,14 @@
+Color:
+  red:
+    "idiom = phone and width < 300": "#aa0000"
+    "idiom = phone and width > 300": "#cc0000"
+    "default": "#ff0000"
+  blue: "#00ff00"
+
+Typography:
+  small: Font("Helvetica", 12)
+  medium: Font("Helvetica", 18)
+
+FooView:
+  background: $Color.red
+  font: $Typography.small
