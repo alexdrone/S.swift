@@ -1,9 +1,10 @@
 # S
 
-_Get strong typed, autocompleted resources like images, fonts and colors in Swift projects_
+_Get strong typed, autocompleted resources, color swatches and typography in Swift projects_
 
 **S** is inspired (and complementary) to **R**.
-It generates swift code from a **YAML** stylesheet. 
+
+It generates strongly typed swift code from a **YAML** stylesheet. 
 
 This:
 
