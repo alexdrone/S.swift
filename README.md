@@ -21,6 +21,7 @@ Typography:
 FooView:
   background: $Color.red
   font: $Typography.small
+  defaultMargin: 10
 
 ```
 
@@ -29,36 +30,44 @@ is transformed into a strongly typed, stylesheet in swift
 ```swift 
 
 ///Entry point for the app stylesheet
-public class S {
+struct S {
 
-	public static let FooView = FooViewStyle()
-	public class FooViewStyle {
-		public var background: UIColor { return Color.red  }
-		public var font: UIFont { return Typography.small }
+	static let FooView = FooViewStyle()
+	class FooViewStyle {
+		var background: UIColor { return Color.red  }
+		var font: UIFont { return Typography.small }
+		let defaultMargin: CGFloat = 10 
 	}
     
-	public static let Color = ColorStyle()
-	public class ColorStyle {
+	static let Color = ColorStyle()
+	class ColorStyle {
 
-		public var blue: UIColor { return UIColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0) }
-		public var red: UIColor { return self.redWithTraitCollection() }
+		let blue = UIColor(red: 0.0, green: 1.0, blue: 0.0)
+		var red: UIColor { return self.redWithTraitCollection() }
 
-		public func redWithTraitCollection(traitCollection: UITraitCollection? = UIScreen.mainScreen().traitCollection) -> UIColor {
-			if UIDevice.currentDevice().userInterfaceIdiom == UIUserInterfaceIdiom.Phone  && traitCollection?.horizontalSizeClass == .Compact {
-                return UIColor(red: 0.8, green: 0.0, blue: 0.0, alpha: 1.0)
-            }
-			return UIColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
+		func redWithTraitCollection(trait: UITraitCollection? = UIScreen.mainScreen().traitCollection) -> UIColor {
+			let device = UIDevice.currentDevice()
+			if device.userInterfaceIdiom == .Phone  && trait?.horizontalSizeClass == .Compact {
+             	return UIColor(red: 0.8, green: 0, blue: 0)
+            	}
+			return UIColor(red: 1, green: 0, blue: 0)
 		}
 	}
     
-	public static let Typography = TypographyStyle()
-	public class TypographyStyle {
-		public var small: UIFont { return UIFont(name: "Helvetica", size: 12.0)! }
+	static let Typography = TypographyStyle()
+	class TypographyStyle {
+		let small = UIFont(name: "Helvetica", size: 12.0)!
 	}
 }
 
 ```
 And you can access to it by simply typing  `S.Color.red` 
+
+The stylesheet supports colors (with some helper function like darken, lighten, gradient), fonts, images, metrics and bools.
+
+
+Like in the example it supports complex conditions for the value that take the screen size, the size class and the user interaction idiom into account.
+(`S.Color.red` could be a different value given a different screen size/size class/idiom). See the stylesheet section for more info about it.
 
 
 ## Installation
