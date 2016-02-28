@@ -33,14 +33,14 @@ is transformed into a strongly typed, stylesheet in swift
 struct S {
 
 	static let FooView = FooViewStyle()
-	class FooViewStyle {
+	struct FooViewStyle {
 		var background: UIColor { return Color.red  }
 		var font: UIFont { return Typography.small }
 		let defaultMargin: CGFloat = 10 
 	}
     
 	static let Color = ColorStyle()
-	class ColorStyle {
+	struct ColorStyle {
 
 		let blue = UIColor(red: 0.0, green: 1.0, blue: 0.0)
 		var red: UIColor { return self.redWithTraitCollection() }
@@ -55,7 +55,7 @@ struct S {
 	}
     
 	static let Typography = TypographyStyle()
-	class TypographyStyle {
+	struct TypographyStyle {
 		let small = UIFont(name: "Helvetica", size: 12.0)!
 	}
 }
@@ -111,3 +111,54 @@ You can integrate **S** in your build pashes by adding it as a build script.
 ![GitHub Logo](Doc/screen_4.jpg)
 
 - Et voilà! Every time you will build your target the generated file will be updated as well.
+
+## Stylesheet 
+
+The following is the grammaer of the YAML stylesheet.
+Is supports simple values (bool, metrics, fonts, colors, images), conditional values and redirects (by simply using $ + Section.key)
+
+```yaml
+
+SECTION_1:
+  KEY: VALUE 	#simple value
+  KEY: 			#conditional value
+  	"CONDITION": VALUE
+  	"CONDITION": VALUE
+  	...
+  	"default": VALUE	#every conditional value should have a 'default' condition
+  KEY: VALUE
+
+SECTION_2:
+  KEY: VALUE
+  KEY: $SECTION_1.KEY #redirect
+  
+SECTION_3 < SECTION_2: #this style inherits from another one
+  KEY: VALUE
+  KEY: $SECTION.KEY #redirect
+
+```
+
+The value part can be formed in the following ways:
+
+```
+	VALUE := COLOR | FONT | NUMBER | BOOL | IMAGE | REDIRECT
+	COLOR := "#HEX" // e.g. "#aabbcc"
+	FONT := Font("FONT_NAME", NUMBER) // e.g. Font("Arial", 12)
+	IMAGE := Image("IMAGE_NAME") // e.g. Image("cursor")
+	NUMBER := (0-9)+ //e.g. 42, a number
+	BOOL := true|false
+	REDIRECT := $SECTION.KEY //e.g. $Typography.small
+```
+
+A condition has instead the following form
+
+```
+	CONDITION := 'EXPR and EXPR and ...' //e.g. 'width < 200 and vertical = compact and idiom = phone'
+	EXPR := SIZE_CLASS_EXPR | SIZE_EXPR | IDIOM_EXPR 
+	SIZE_CLASS_EXPR := (horizontal|vertical)(=|!=)(regular|compact) // e.g. horizontal = regular
+	SIZE_EXPR := (width|height)(<|<=|=|!=|>|>=)(SIZE_PX) //e.g. width > 320
+	SIZE_PX := (0-9)+ //e.g. 42, a number
+	IDIOM_EXPR := (idiom)(=|!=)(pad|phone) //e.g. idiom = pad
+
+```
+
