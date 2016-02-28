@@ -9,83 +9,40 @@ public class S {
 	public static let FooView = FooViewStyle()
 	public class FooViewStyle {
 
-		//MARK: background 
-		private var __background: UIColor?
-		private func backgroundWithTraitCollection(traitCollection: UITraitCollection? = UIScreen.mainScreen().traitCollection) -> UIColor {
-			if let override = __background { return override }
-			return Color.redWithTraitCollection(traitCollection)
-		}
 		public var background: UIColor {
-			get { return self.backgroundWithTraitCollection() }
-			set { __background = newValue }
+			get { return Color.red }
 		}
 
-		//MARK: font 
-		private var __font: UIFont?
-		private func fontWithTraitCollection(traitCollection: UITraitCollection? = UIScreen.mainScreen().traitCollection) -> UIFont {
-			if let override = __font { return override }
-			return Typography.smallWithTraitCollection(traitCollection)
-		}
 		public var font: UIFont {
-			get { return self.fontWithTraitCollection() }
-			set { __font = newValue }
+			get { return Typography.small }
 		}
 	}
+    
 //MARK: - Color
 	public static let Color = ColorStyle()
 	public class ColorStyle {
 
-		//MARK: blue 
-		private var __blue: UIColor?
-		private func blueWithTraitCollection(traitCollection: UITraitCollection? = UIScreen.mainScreen().traitCollection) -> UIColor {
-			if let override = __blue { return override }
-			return UIColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
-		}
 		public var blue: UIColor {
-			get { return self.blueWithTraitCollection() }
-			set { __blue = newValue }
+			get { return UIColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0) }
 		}
 
-		//MARK: red 
-		private var __red: UIColor?
 		public func redWithTraitCollection(traitCollection: UITraitCollection? = UIScreen.mainScreen().traitCollection) -> UIColor {
-			if let override = __red { return override }
-			if UIDevice.currentDevice().userInterfaceIdiom == UIUserInterfaceIdiom.Phone  && UIScreen.mainScreen().bounds.size.width > 300.0  { 
-			return UIColor(red: 0.8, green: 0.0, blue: 0.0, alpha: 1.0) }
-			if UIDevice.currentDevice().userInterfaceIdiom == UIUserInterfaceIdiom.Phone  && UIScreen.mainScreen().bounds.size.width < 300.0  { 
-			return UIColor(red: 0.666667, green: 0.0, blue: 0.0, alpha: 1.0) }
-			
+			if UIDevice.currentDevice().userInterfaceIdiom == UIUserInterfaceIdiom.Phone  && traitCollection?.horizontalSizeClass == .Compact {
+                return UIColor(red: 0.8, green: 0.0, blue: 0.0, alpha: 1.0)
+            }
 			return UIColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
 		}
+        
 		public var red: UIColor {
 			get { return self.redWithTraitCollection() }
-			set { __red = newValue }
 		}
 	}
-//MARK: - Typography
+    
 	public static let Typography = TypographyStyle()
 	public class TypographyStyle {
 
-		//MARK: small 
-		private var __small: UIFont?
-		private func smallWithTraitCollection(traitCollection: UITraitCollection? = UIScreen.mainScreen().traitCollection) -> UIFont {
-			if let override = __small { return override }
-			return UIFont(name: "Helvetica", size: 12.0)!
-		}
 		public var small: UIFont {
-			get { return self.smallWithTraitCollection() }
-			set { __small = newValue }
-		}
-
-		//MARK: medium 
-		private var __medium: UIFont?
-		private func mediumWithTraitCollection(traitCollection: UITraitCollection? = UIScreen.mainScreen().traitCollection) -> UIFont {
-			if let override = __medium { return override }
-			return UIFont(name: "Helvetica", size: 18.0)!
-		}
-		public var medium: UIFont {
-			get { return self.mediumWithTraitCollection() }
-			set { __medium = newValue }
+			get { return UIFont(name: "Helvetica", size: 12.0)! }
 		}
 	}
 
