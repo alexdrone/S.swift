@@ -6,11 +6,9 @@
 [![Build](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 
 
-_Get strong typed, autocompleted resources, color swatches and typography in Swift projects_
+_Get strong typed, autocompleted resources, color swatches and font styles in Swift projects from as simple, human readable Yaml stylesheet_
 
 **S** is inspired (and complementary) to **R**.
-
-It generates strongly typed swift code from a **YAML** stylesheet. 
 
 This:
 
