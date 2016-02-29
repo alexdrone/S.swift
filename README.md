@@ -33,6 +33,7 @@ FooView:
   defaultMargin: 10
 
 ```
+<sup>Check out Style.yaml in the Demo project to see more examples of property definitions.</sub>
 
 is transformed into a strongly typed, stylesheet in swift
 
