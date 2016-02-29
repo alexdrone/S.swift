@@ -1,7 +1,7 @@
 <p align="center">
 ![GitHub Logo](Doc/logo.png)
 
-[![Build](https://img.shields.io/badge/build-1.0-green.svg?style=flat)](#)
+[![Build](https://img.shields.io/badge/build-passing-green.svg?style=flat)](#)
 [![Platform](https://img.shields.io/badge/platform-ios | watchos | tvos -lightgrey.svg?style=flat)](#)
 [![Build](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 
