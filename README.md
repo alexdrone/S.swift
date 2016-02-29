@@ -36,14 +36,6 @@ is transformed into a strongly typed, stylesheet in swift
 
 ///Entry point for the app stylesheet
 struct S {
-
-	static let FooView = FooViewStyle()
-	struct FooViewStyle {
-		var background: UIColor { return Color.red  }
-		var font: UIFont { return Typography.small }
-		let defaultMargin: CGFloat = 10 
-	}
-    
 	static let Color = ColorStyle()
 	struct ColorStyle {
 
@@ -63,6 +55,14 @@ struct S {
 	struct TypographyStyle {
 		let small = UIFont(name: "Helvetica", size: 12.0)!
 	}
+	
+	static let FooView = FooViewStyle()
+	struct FooViewStyle {
+		var background: UIColor { return Color.red  }
+		var font: UIFont { return Typography.small }
+		let defaultMargin: CGFloat = 10 
+	}
+    
 }
 
 ```
