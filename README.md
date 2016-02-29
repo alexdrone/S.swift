@@ -10,6 +10,8 @@ _Get strong typed, autocompleted resources, color swatches and font styles in Sw
 
 **S** is inspired (and complementary) to **R**.
 
+**S** is just a lightweight tool to generate code, you don't have to import any framework in your project!
+
 This:
 
 ```yaml
