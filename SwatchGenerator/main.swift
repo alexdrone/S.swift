@@ -72,6 +72,8 @@ func generate(file: String) {
 }
 
 var args = [String](Process.arguments)
+print(args)
+
 if args.count == 1 {
     print("\n")
     print("usage: sgen PROJECT_PATH (--platform ios|osx) (--extensions) (--objc)")
