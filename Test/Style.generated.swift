@@ -3,11 +3,11 @@
 import Cocoa
 
 ///Entry point for the app stylesheet
-@objc public class S: NSObject {
+public class S {
 
 //MARK: - Typography
-	@objc public static let Typography = TypographyStyle()
-	@objc public class TypographyStyle: NSObject {
+	public static let Typography = TypographyStyle()
+	public class TypographyStyle {
 
 		//MARK: small 
 		private var __small: NSFont?
@@ -15,7 +15,7 @@ import Cocoa
 			if let override = __small { return override }
 			return NSFont.systemFontOfSize(12.0)
 		}
-		@objc public var small: NSFont {
+		public var small: NSFont {
 			get { return self.smallIn() }
 			set { __small = newValue }
 		}
@@ -26,14 +26,14 @@ import Cocoa
 			if let override = __medium { return override }
 			return NSFont.systemFontOfSize(18.0)
 		}
-		@objc public var medium: NSFont {
+		public var medium: NSFont {
 			get { return self.mediumIn() }
 			set { __medium = newValue }
 		}
 	}
 //MARK: - DefaultButton
-	@objc public static let DefaultButton = DefaultButtonStyle()
-	@objc public class DefaultButtonStyle: ButtonStyle {
+	public static let DefaultButton = DefaultButtonStyle()
+	public class DefaultButtonStyle: ButtonStyle {
 
 		//MARK: opaque 
 		override private func opaqueIn() -> Bool {
@@ -53,14 +53,14 @@ import Cocoa
 			if let override = __color { return override }
 			return Color.blueIn()
 		}
-		@objc public var color: NSColor {
+		public var color: NSColor {
 			get { return self.colorIn() }
 			set { __color = newValue }
 		}
 	}
 //MARK: - Button
-	@objc public static let Button = ButtonStyle()
-	@objc public class ButtonStyle: NSObject {
+	public static let Button = ButtonStyle()
+	public class ButtonStyle {
 
 		//MARK: opaque 
 		private var __opaque: Bool?
@@ -68,7 +68,7 @@ import Cocoa
 			if let override = __opaque { return override }
 			return true
 		}
-		@objc public var opaque: Bool {
+		public var opaque: Bool {
 			get { return self.opaqueIn() }
 			set { __opaque = newValue }
 		}
@@ -79,7 +79,7 @@ import Cocoa
 			if let override = __margin { return override }
 			return Float(12.0)
 		}
-		@objc public var margin: Float {
+		public var margin: Float {
 			get { return self.marginIn() }
 			set { __margin = newValue }
 		}
@@ -90,14 +90,14 @@ import Cocoa
 			if let override = __font { return override }
 			return Typography.smallIn()
 		}
-		@objc public var font: NSFont {
+		public var font: NSFont {
 			get { return self.fontIn() }
 			set { __font = newValue }
 		}
 	}
 //MARK: - Color
-	@objc public static let Color = ColorStyle()
-	@objc public class ColorStyle: NSObject {
+	public static let Color = ColorStyle()
+	public class ColorStyle {
 
 		//MARK: blue 
 		private var __blue: NSColor?
@@ -105,7 +105,7 @@ import Cocoa
 			if let override = __blue { return override }
 			return NSColor(red: 0.666667, green: 0.733333, blue: 0.8, alpha: 1.0)
 		}
-		@objc public var blue: NSColor {
+		public var blue: NSColor {
 			get { return self.blueIn() }
 			set { __blue = newValue }
 		}
@@ -121,7 +121,7 @@ import Cocoa
 			
 			return NSColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0)
 		}
-		@objc public var red: NSColor {
+		public var red: NSColor {
 			get { return self.redIn() }
 			set { __red = newValue }
 		}

@@ -95,6 +95,17 @@ The usage of the generator is as simple as
 sgen $SRCROOT
 ```
 
+### Advanced usage
+**S** can generate swift code for both iOS and OSX. 
+In addition you can specify to generate code accessible from ObjC code.
+
+```
+usage: sgen PROJECT_PATH (--platform ios|osx) (--extensions) (--objc)
+--platform: Select the target platform
+--extension: Creates protocol extensions for the generated appearance proxies
+--objc: Still generate Swift code, but accessible from ObjC
+```
+
 ## Adding S as a build script
 
 You can integrate **S** in your build pashes by adding it as a build script.
