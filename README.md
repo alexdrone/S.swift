@@ -12,6 +12,8 @@ _Get strong typed, autocompleted resources, color swatches and font styles in Sw
 
 **S** is just a lightweight tool to generate code, you don't have to import any framework in your project!
 
+## Overview
+
 This:
 
 ```yaml
@@ -68,12 +70,12 @@ struct S {
 }
 
 ```
-And you can access to it by simply typing  `S.Color.red` 
+You can access to a property (in this example Color.red) it by simply typing `S.Color.red` in your code.
 
 The stylesheet supports colors (with some helper function like darken, lighten, gradient), fonts, images, metrics and bools.
 
 
-Like in the example it supports complex conditions for the value that take the screen size, the size class and the user interaction idiom into account.
+Like in the example above, S supports complex conditions for the value that take the screen size, the size class and the user interaction idiom into account.
 (`S.Color.red` could be a different value given a different screen size/size class/idiom). See the stylesheet section for more info about it.
 
 
