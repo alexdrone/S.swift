@@ -1,4 +1,5 @@
-# S
+<p align="center">
+![GitHub Logo](Doc/logo.png)
 
 _Get strong typed, autocompleted resources, color swatches and typography in Swift projects_
 
@@ -144,7 +145,7 @@ The value part can be formed in the following ways:
 ```
 	VALUE := COLOR | FONT | NUMBER | BOOL | IMAGE | REDIRECT
 	COLOR := "#HEX" // e.g. "#aabbcc"
-	FONT := Font("FONT_NAME", NUMBER) // e.g. Font("Arial", 12)
+	FONT := Font("FONT_NAME", NUMBER) // e.g. Font("Arial", 12) (use System or SystemBold to use the system font)
 	IMAGE := Image("IMAGE_NAME") // e.g. Image("cursor")
 	NUMBER := (0-9)+ //e.g. 42, a number
 	BOOL := true|false
