@@ -154,7 +154,15 @@ extension RhsValue: Generatable {
         switch self {
         case .Scalar(let float): return "\n\t\t\treturn Float(\(float))"
         case .Boolean(let boolean): return "\n\t\t\treturn \(boolean)"
-        case .Font(let font): return "\n\t\t\treturn UIFont(name: \(font.fontName), size: \(font.fontSize))!"
+        case .Font(let font):
+            let prefix = "\n\t\t\treturn "
+            if font.isSystemFont {
+                return "\(prefix)UIFont.systemFontOfSize(\(font.fontSize))"
+            } else if font.isSystemBoldFont {
+                return "\(prefix)UIFont.boldSystemFontOfSize(\(font.fontSize))"
+            } else {
+                return "\(prefix)UIFont(name: \(font.fontName), size: \(font.fontSize))!"
+            }
         case .Color(let color): return "\n\t\t\treturn UIColor(red: \(color.red), green: \(color.green), blue: \(color.blue), alpha: \(color.alpha))"
         case .Image(let image): return "\n\t\t\treturn UIImage(named: \"\(image)\")"
         case .Redirect(let redirection): return "\n\t\t\treturn \(redirection.redirection)WithTraitCollection(traitCollection)"
