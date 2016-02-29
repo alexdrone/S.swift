@@ -8,7 +8,7 @@
 
 _Get strong typed, autocompleted resources, color swatches and font styles in Swift projects from as simple, human readable Yaml stylesheet_
 
-**S** is inspired (and complementary) to **R**.
+**S** is inspired from *(and complementary to)* **R**.
 
 **S** is just a lightweight tool to generate code, you don't have to import any framework in your project!
 
