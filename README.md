@@ -180,3 +180,6 @@ A condition has instead the following form
 
 ```
 
+##Credits
+
+**S** uses [YamlSwift](https://github.com/behrang/YamlSwift) from *behrang* as Yaml parser
