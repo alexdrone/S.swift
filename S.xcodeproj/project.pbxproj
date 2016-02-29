@@ -145,6 +145,7 @@
 				16F9E0311C772AAC0083C55D /* Frameworks */,
 				16F9E0321C772AAC0083C55D /* Headers */,
 				16F9E0331C772AAC0083C55D /* Resources */,
+				16F6A9111C84578400A35BBF /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -217,6 +218,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		16F6A9111C84578400A35BBF /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "sgen $SCRROOT";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		16F9E0301C772AAC0083C55D /* Sources */ = {

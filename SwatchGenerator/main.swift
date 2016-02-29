@@ -65,14 +65,29 @@ func generate(file: String) {
     
     rm(dest)
     //touch(dest)
-    sleep(2)
+    sleep(1)
     try! payload.writeToFile(dest, atomically: true, encoding: NSUTF8StringEncoding)
     
     print("\(dest) generated.")
 }
 
-let args = [String](Process.arguments)
-let path = args.count >= 2 ? args[1] : "."
+var args = [String](Process.arguments)
+if args.count == 1 {
+    print("\n")
+    print("usage: sgen PROJECT_PATH (--platform ios|osx) (--extensions) (--objc)")
+    print("--platform: Select the target platform")
+    print("--extension: Creates protocol extensions for the generated appearance proxies")
+    print("--objc: Still generate Swift code, but accessible from ObjC")
+    print("\n")
+    exit(1)
+}
+
+//configuration
+if args.contains("--objc") { Configuration.objcGeneration = true }
+if args.contains("--extensions") { Configuration.extensions = true }
+if args.contains("--platform") && args.contains("osx") { Configuration.targetOsx = true }
+
+let path = args[1]
 let files = search(path)
 
 for file in files {

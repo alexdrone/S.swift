@@ -9,8 +9,11 @@
 import Foundation
 
 //MARK: Rhs
-
-public var ObjcGeneration = false
+public struct Configuration {
+    public static var objcGeneration = false
+    public static var extensions = false
+    public static var targetOsx = false
+}
 
 internal enum RhsError: ErrorType {
     case MalformedRhsValue(error: String)
@@ -124,13 +127,13 @@ internal enum RhsValue {
         switch self {
         case .Scalar(_): return "Float"
         case .Boolean(_): return "Bool"
-        case .Font(_): return "UIFont"
-        case .Color(_): return "UIColor"
-        case .Image(_): return "UIImage"
+        case .Font(_): return Configuration.targetOsx ? "NSFont" : "UIFont"
+        case .Color(_): return Configuration.targetOsx ? "NSColor" : "UIColor"
+        case .Image(_): return Configuration.targetOsx ? "NSImage" : "UIImage"
         case .Redirect(let r): return r.type
         case .Hash(let hash): for (_, rhs) in hash { return rhs.returnValue() }
         }
-        return "Any"
+        return "AnyObject"
     }
 }
 
@@ -144,43 +147,90 @@ internal class RhsRedirectValue {
     }
 }
 
-
 //MARK: Generator
 
 extension RhsValue: Generatable {
 
     internal func generate() -> String {
         
+        let indentation = "\n\t\t\t"
+        let prefix = "\(indentation)return "
+        
         switch self {
-        case .Scalar(let float): return "\n\t\t\treturn Float(\(float))"
-        case .Boolean(let boolean): return "\n\t\t\treturn \(boolean)"
+        case .Scalar(let float):
+            return generateScalar(prefix, float: float)
+            
+        case .Boolean(let boolean):
+            return generateBool(prefix, boolean: boolean)
+            
         case .Font(let font):
-            let prefix = "\n\t\t\treturn "
-            if font.isSystemFont {
-                return "\(prefix)UIFont.systemFontOfSize(\(font.fontSize))"
-            } else if font.isSystemBoldFont {
-                return "\(prefix)UIFont.boldSystemFontOfSize(\(font.fontSize))"
-            } else {
-                return "\(prefix)UIFont(name: \(font.fontName), size: \(font.fontSize))!"
-            }
-        case .Color(let color): return "\n\t\t\treturn UIColor(red: \(color.red), green: \(color.green), blue: \(color.blue), alpha: \(color.alpha))"
-        case .Image(let image): return "\n\t\t\treturn UIImage(named: \"\(image)\")"
-        case .Redirect(let redirection): return "\n\t\t\treturn \(redirection.redirection)WithTraitCollection(traitCollection)"
+            return generateFont(prefix, font: font)
+            
+        case .Color(let color):
+            return generateColor(prefix, color: color)
+            
+        case .Image(let image):
+            return generateImage(prefix, image: image)
+
+        case .Redirect(let redirection):
+            return generateRedirection(prefix, redirection: redirection)
+            
         case .Hash(let hash):
             var string = ""
             for (condition, rhs) in hash {
                 if !condition.isDefault() {
-                    string += "\n\t\t\tif \(condition.generate()) { \(rhs.generate()) }"
+                    string += "\(indentation)if \(condition.generate()) { \(rhs.generate()) }"
                 }
             }
+            //default should be the last condition
             for (condition, rhs) in hash {
                 if condition.isDefault() {
-                    string += "\n\t\t\t\(rhs.generate())"
+                    string += "\(indentation)\(rhs.generate())"
                 }
             }
             return string
         }        
     }
+    
+    func generateScalar(prefix: String, float: Float) -> String {
+        return "\(prefix)Float(\(float))"
+    }
+    
+    func generateBool(prefix: String, boolean: Bool) -> String {
+        return "\(prefix)\(boolean)"
+    }
+    
+    func generateFont(prefix: String, font: Rhs.Font) -> String {
+        let fontClass = Configuration.targetOsx ? "NSFont" : "UIFont"
+        
+        //system font
+        if font.isSystemBoldFont || font.isSystemFont {
+            let function = font.isSystemFont ? "systemFontOfSize" : "boldSystemFontOfSize"
+            return "\(prefix)\(fontClass).\(function)(\(font.fontSize))"
+        }
+        
+        //font with name
+        return "\(prefix)\(fontClass)(name: \(font.fontName), size: \(font.fontSize))!"
+    }
+    
+    func generateColor(prefix: String, color: Rhs.Color) -> String {
+        let colorClass = Configuration.targetOsx ? "NSColor" : "UIColor"
+        return "\(prefix)\(colorClass)(red: \(color.red), green: \(color.green), blue: \(color.blue), alpha: \(color.alpha))"
+    }
+    
+    func generateImage(prefix: String, image: String) -> String {
+        let colorClass = Configuration.targetOsx ? "NSImage" : "UImage"
+        return "\(prefix)\(colorClass)(named: \"\(image)\")"
+    }
+    
+    func generateRedirection(prefix: String, redirection: RhsRedirectValue) -> String {
+        if Configuration.targetOsx {
+            return "\(prefix)\(redirection.redirection)In()"
+        } else {
+            return "\(prefix)\(redirection.redirection)In(traitCollection)"
+        }
+    }
+    
 }
 
 //MARK: Property
@@ -206,19 +256,20 @@ extension Property: Generatable {
             method += "\n\t\tprivate var __\(self.key): \(self.rhs.returnValue())?"
         }
         
-        let objc = ObjcGeneration ? "@objc " : ""
+        //options
+        let objc = Configuration.objcGeneration ? "@objc " : ""
+        let methodArgs =  Configuration.targetOsx ? "" : "traitCollection: UITraitCollection? = UIScreen.mainScreen().traitCollection"
         let methodPublic = self.rhs.isHash ? "public" : "private"
-        let methodArgs = "traitCollection: UITraitCollection? = UIScreen.mainScreen().traitCollection"
         let override = self.isOverride ? "override " : ""
         
-        method += "\n\t\t\(override)\(methodPublic) func \(self.key)WithTraitCollection(\(methodArgs)) -> \(self.rhs.returnValue()) {"
+        method += "\n\t\t\(override)\(methodPublic) func \(self.key)In(\(methodArgs)) -> \(self.rhs.returnValue()) {"
         method += "\n\t\t\tif let override = __\(self.key) { return override }"
         method += "\(rhs.generate())"
         method += "\n\t\t}"
         
         if !self.isOverride {
             method += "\n\t\t\(objc)public var \(self.key): \(self.rhs.returnValue()) {"
-            method += "\n\t\t\tget { return self.\(self.key)WithTraitCollection() }"
+            method += "\n\t\t\tget { return self.\(self.key)In() }"
             method += "\n\t\t\tset { __\(self.key) = newValue }"
             method += "\n\t\t}"
         }
@@ -254,8 +305,8 @@ extension Style: Generatable {
     internal func generate() -> String {
         var wrapper = ""
         wrapper += "//MARK: - \(self.name)"
-        let objc = ObjcGeneration ? "@objc " : ""
-        var superclass = ObjcGeneration ? ": NSObject" : ""
+        let objc = Configuration.objcGeneration ? "@objc " : ""
+        var superclass = Configuration.objcGeneration ? ": NSObject" : ""
         if let s = self.superclassName { superclass = ": \(s)Style" }
         wrapper += "\n\t\(objc)public static let \(self.name) = \(self.name)Style()"
         wrapper += "\n\t\(objc)public class \(self.name)Style\(superclass) {"
@@ -335,11 +386,12 @@ extension Stylesheet: Generatable {
     internal func generate() -> String {
         var stylesheet = ""
         
-        let objc = ObjcGeneration ? "@objc " : ""
-        let superclass = ObjcGeneration ? ": NSObject" : ""
-
+        let objc = Configuration.objcGeneration ? "@objc " : ""
+        let superclass = Configuration.objcGeneration ? ": NSObject" : ""
+        let importDef = Configuration.targetOsx ? "Cocoa" : "UIKit"
+        
         stylesheet += "///Autogenerated file\n"
-        stylesheet += "\nimport UIKit\n\n"
+        stylesheet += "\nimport \(importDef)\n\n"
         stylesheet += "///Entry point for the app stylesheet\n"
         stylesheet += "\(objc)public class \(self.name)\(superclass) {\n\n"
         for style in self.styles {
