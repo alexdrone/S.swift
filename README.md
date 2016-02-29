@@ -15,16 +15,16 @@ This:
 ```yaml
 
 Color:
-  red:
-    "horizontal = compact and idiom = phone": "#aa0000"
+  blue: "#00ff00" #values can be colors, font, images, numbers or bool
+  red: #properties can also have different values (when the different conditions are matched)
+    "horizontal = compact and idiom = phone": "#aa0000" 
     "default": "#ff0000"
-  blue: "#00ff00"
 
 Typography:
-  small: Font("Helvetica", 12)
+  small: Font("Helvetica", 12) #a font (use System or SystemBold as font names to use the system font)
   
 FooView:
-  background: $Color.red
+  background: $Color.red #properties can also redirect to other style's properties
   font: $Typography.small
   defaultMargin: 10
 
