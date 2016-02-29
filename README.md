@@ -70,6 +70,8 @@ struct S {
 }
 
 ```
+<sub><sup>The actual code is a bit more complex because it supports styles inheritance and setting the properties from the outside. Check out Style.generated.swift in the Demo project.</sub></sup>
+
 You can access to a property (in this example Color.red) it by simply typing `S.Color.red` in your code.
 
 The stylesheet supports colors (with some helper function like darken, lighten, gradient), fonts, images, metrics and bools.
