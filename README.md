@@ -6,7 +6,7 @@
 [![Build](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 
 
-_Get strong typed, autocompleted resources, color swatches and font styles in Swift projects from as simple, human readable Yaml stylesheet_
+_Get strong typed, autocompleted resources, color swatches and font styles in Swift projects from a simple, human readable Yaml stylesheet_
 
 **S** is inspired from *(and complementary to)* **R**.
 
@@ -71,7 +71,7 @@ struct S {
 }
 
 ```
-<sup>The actual code is a bit more complex because it supports styles inheritance and setting the properties from the outside. Check out Style.generated.swift in the Demo project.</sub>
+<sup>The actual code is a bit more complex because it supports styles inheritance and setting the properties from the outside. Also there are different code-generation options that can be passed as argument to the generator. Check out Style.generated.swift in the Demo project.</sub>
 
 You can access to a property (in this example Color.red) it by simply typing `S.Color.red` in your code.
 
