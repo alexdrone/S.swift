@@ -1,8 +1,7 @@
 <p align="center">
 ![GitHub Logo](Doc/logo.png)
 
-[![Build](https://img.shields.io/badge/build-passing-green.svg?style=flat)](#)
-[![Bin](https://img.shields.io/badge/binary-download-blue.svg?style=flat)](https://raw.githubusercontent.com/alexdrone/S/master/sgen)
+[![Bin](https://img.shields.io/badge/binary-download-green.svg?style=flat)](https://raw.githubusercontent.com/alexdrone/S/master/sgen)
 [![Platform](https://img.shields.io/badge/platform-ios | osx | watchos | tvos -lightgrey.svg?style=flat)](#)
 [![Build](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 
