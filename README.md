@@ -8,7 +8,7 @@
 
 _Get strong typed, autocompleted resources, color swatches and font styles in Swift projects from a simple, human readable Yaml stylesheet_
 
-**S** is inspired from *(and complementary to)* **R**.
+**S** is inspired from *(and complementary to)* **[R](https://github.com/mac-cain13/R.swift)**.
 
 **S** is just a lightweight tool to generate code, you don't have to import any framework in your project!
 
@@ -126,12 +126,6 @@ You can integrate **S** in your build pashes by adding it as a build script.
 
 <p align="center">
 ![GitHub Logo](Doc/screen_3.jpg)
-
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
-[![Build](https://img.shields.io/badge/build-passing-green.svg?style=flat)](#)
-[![Platform](https://img.shields.io/badge/platform-ios | osx | watchos | tvos -lightgrey.svg?style=flat)](#)
-[![Build](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
-
 
 - The first time you build your target (with `cmd + B`) you need to drag the generated file inside the project. The generated swift file sits next to your stylesheet so, simply right click on your yaml stylesheet and select **Show in Finder** and drag the  `*.generated.swift` file inside your project
 
