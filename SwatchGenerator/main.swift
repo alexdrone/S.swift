@@ -16,6 +16,7 @@ func search(basePath: String = ".") -> [String] {
     task.arguments = ["\(args[1])", "\"*.yaml\""]
     let pipe = NSPipe()
     task.standardOutput = pipe
+    task.standardError = nil
     task.launch()
     
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
@@ -72,7 +73,6 @@ func generate(file: String) {
 }
 
 var args = [String](Process.arguments)
-print(args)
 
 if args.count == 1 {
     print("\n")

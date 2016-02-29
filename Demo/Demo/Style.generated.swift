@@ -3,11 +3,11 @@
 import Cocoa
 
 ///Entry point for the app stylesheet
-public class S {
+@objc public class S: NSObject {
 
 //MARK: - FooView
-	public static let FooView = FooViewStyle()
-	public class FooViewStyle {
+	@objc public static let FooView = FooViewStyle()
+	@objc public class FooViewStyle: NSObject {
 
 		//MARK: background 
 		private var __background: NSColor?
@@ -15,7 +15,7 @@ public class S {
 			if let override = __background { return override }
 			return Color.redIn()
 		}
-		public var background: NSColor {
+		@objc public var background: NSColor {
 			get { return self.backgroundIn() }
 			set { __background = newValue }
 		}
@@ -26,14 +26,14 @@ public class S {
 			if let override = __font { return override }
 			return Typography.smallIn()
 		}
-		public var font: NSFont {
+		@objc public var font: NSFont {
 			get { return self.fontIn() }
 			set { __font = newValue }
 		}
 	}
 //MARK: - Color
-	public static let Color = ColorStyle()
-	public class ColorStyle {
+	@objc public static let Color = ColorStyle()
+	@objc public class ColorStyle: NSObject {
 
 		//MARK: blue 
 		private var __blue: NSColor?
@@ -41,7 +41,7 @@ public class S {
 			if let override = __blue { return override }
 			return NSColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
 		}
-		public var blue: NSColor {
+		@objc public var blue: NSColor {
 			get { return self.blueIn() }
 			set { __blue = newValue }
 		}
@@ -55,14 +55,14 @@ public class S {
 			
 			return NSColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
 		}
-		public var red: NSColor {
+		@objc public var red: NSColor {
 			get { return self.redIn() }
 			set { __red = newValue }
 		}
 	}
 //MARK: - Typography
-	public static let Typography = TypographyStyle()
-	public class TypographyStyle {
+	@objc public static let Typography = TypographyStyle()
+	@objc public class TypographyStyle: NSObject {
 
 		//MARK: small 
 		private var __small: NSFont?
@@ -70,7 +70,7 @@ public class S {
 			if let override = __small { return override }
 			return NSFont(name: "Helvetica", size: 12.0)!
 		}
-		public var small: NSFont {
+		@objc public var small: NSFont {
 			get { return self.smallIn() }
 			set { __small = newValue }
 		}
@@ -81,7 +81,7 @@ public class S {
 			if let override = __medium { return override }
 			return NSFont(name: "Helvetica", size: 18.0)!
 		}
-		public var medium: NSFont {
+		@objc public var medium: NSFont {
 			get { return self.mediumIn() }
 			set { __medium = newValue }
 		}
