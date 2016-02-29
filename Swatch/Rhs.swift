@@ -124,11 +124,11 @@ internal struct Rhs {
         internal let fontSize: Float
         
         internal var isSystemFont: Bool {
-            return self.fontName.caseInsensitiveCompare("System") == NSComparisonResult.OrderedSame
+            return self.fontName.containsString("System")
         }
         
         internal var isSystemBoldFont: Bool {
-            return self.fontName.caseInsensitiveCompare("SystemBold") == NSComparisonResult.OrderedSame
+            return self.fontName.containsString("SystemBold")
         }
         
         init(name fontName: String, size fontSize: Float) {

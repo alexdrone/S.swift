@@ -13,7 +13,7 @@ import Cocoa
 		private var __small: NSFont?
 		private func smallIn() -> NSFont {
 			if let override = __small { return override }
-			return NSFont(name: "System", size: 12.0)!
+			return NSFont.systemFontOfSize(12.0)
 		}
 		@objc public var small: NSFont {
 			get { return self.smallIn() }
@@ -24,7 +24,7 @@ import Cocoa
 		private var __medium: NSFont?
 		private func mediumIn() -> NSFont {
 			if let override = __medium { return override }
-			return NSFont(name: "System", size: 18.0)!
+			return NSFont.systemFontOfSize(18.0)
 		}
 		@objc public var medium: NSFont {
 			get { return self.mediumIn() }
