@@ -38,7 +38,7 @@
 
 /* Begin PBXFileReference section */
 		1646022F1C77334800FC9992 /* Generatable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Generatable.swift; sourceTree = "<group>"; };
-		1646B9D51C806BD700970AD0 /* Style.yaml */ = {isa = PBXFileReference; lastKnownFileType = text; name = Style.yaml; path = Test/Style.yaml; sourceTree = SOURCE_ROOT; };
+		1646B9D51C806BD700970AD0 /* Style.yml */ = {isa = PBXFileReference; lastKnownFileType = text; name = Style.yml; path = Test/Style.yml; sourceTree = SOURCE_ROOT; };
 		168354421C808BA8008EA29F /* Condition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
 		168354451C808BCB008EA29F /* Style.generated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Style.generated.swift; path = Test/Style.generated.swift; sourceTree = SOURCE_ROOT; };
 		16AC37191C7772EE00F61BE9 /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
@@ -74,7 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				168354451C808BCB008EA29F /* Style.generated.swift */,
-				1646B9D51C806BD700970AD0 /* Style.yaml */,
+				1646B9D51C806BD700970AD0 /* Style.yml */,
 			);
 			name = test;
 			sourceTree = "<group>";
@@ -231,7 +231,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "sgen $SRCROOT --platform osx\n";
+			shellScript = "$SRCROOT/sgen $SRCROOT --platform osx\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

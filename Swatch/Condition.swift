@@ -8,12 +8,12 @@
 
 import Foundation
 
-internal enum ConditionError: ErrorType {
+enum ConditionError: ErrorType {
     case MalformedCondition(error: String)
     case MalformedRhsValue(error: String)
 }
 
-internal func ==<T:Parsable>(lhs: T, rhs: T) -> Bool {
+func ==<T:Parsable>(lhs: T, rhs: T) -> Bool {
     return lhs.rawString == rhs.rawString
 }
 
@@ -21,7 +21,7 @@ func hash<T:Parsable>(item: T) -> Int {
     return item.rawString.hashValue;
 }
 
-internal protocol Parsable: Equatable {
+protocol Parsable: Equatable {
 
     //the original string that originated this parsed item
     var rawString: String { get }
@@ -30,9 +30,9 @@ internal protocol Parsable: Equatable {
 }
 
 
-internal struct Condition: Hashable, Parsable {
+struct Condition: Hashable, Parsable {
 
-    internal struct ExpressionToken {
+    struct ExpressionToken {
 
         enum Default: String {
             case Default = "default"
@@ -110,10 +110,10 @@ internal struct Condition: Hashable, Parsable {
         }
     }
 
-    internal struct Expression: Hashable, Parsable {
+    struct Expression: Hashable, Parsable {
 
         ///@see Parsable
-        internal let rawString: String
+        let rawString: String
 
         ///Wether this expression is always true or not
         private let tautology: Bool
@@ -123,13 +123,13 @@ internal struct Condition: Hashable, Parsable {
 
 
         //Hashable compliancy
-        internal var hashValue: Int {
+        var hashValue: Int {
             get {
                 return hash(self)
             }
         }
 
-        internal init(rawString: String) throws {
+        init(rawString: String) throws {
 
             self.rawString = normalizeExpressionString(rawString)
 
@@ -179,17 +179,17 @@ internal struct Condition: Hashable, Parsable {
     }
 
     ///@see Parsable
-    internal let rawString: String
+    let rawString: String
     var expressions: [Expression] = [Expression]()
 
     //Hashable compliancy
-    internal var hashValue: Int {
+    var hashValue: Int {
         get {
             return hash(self)
         }
     }
 
-    internal init(rawString: String) throws {
+    init(rawString: String) throws {
 
         self.rawString = normalizeExpressionString(rawString)
 
@@ -199,7 +199,7 @@ internal struct Condition: Hashable, Parsable {
         }
     }
 
-    internal func isDefault() -> Bool {
+    func isDefault() -> Bool {
         return self.rawString.containsString("default")
     }
 
@@ -226,7 +226,7 @@ private func normalizeExpressionString(string: String, forceLowerCase: Bool = tr
 extension Condition: Generatable {
 
     ///Generates the code for this right hand side value
-    internal func generate() -> String {
+    func generate() -> String {
 
         var expressions = [String]()
         for expression in self.expressions {

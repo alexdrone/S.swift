@@ -10,7 +10,7 @@ import Foundation
 
 ///Returns the arguments strings from a rule string
 ///e.g. font("Comic Sans", 12) -> ["Comic Sans", "12"]
-internal func argumentsFromString(key: String, string: String) -> [String]? {
+func argumentsFromString(key: String, string: String) -> [String]? {
     
     let input = string.stringByReplacingOccurrencesOfString(key.capitalizedString, withString: key);
     
@@ -25,7 +25,7 @@ internal func argumentsFromString(key: String, string: String) -> [String]? {
 }
 
 ///Parse a number from a string
-internal func parseNumber(string: String) -> Float {
+func parseNumber(string: String) -> Float {
     var input = string.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
     input = (input as NSString).stringByReplacingOccurrencesOfString("\"", withString: "")
     
@@ -41,7 +41,7 @@ internal func parseNumber(string: String) -> Float {
 }
 
 ///Additional preprocessing for the string
-internal func preprocessInput(string: String) -> String {
+func preprocessInput(string: String) -> String {
     var result = string.stringByReplacingOccurrencesOfString("#", withString: "color(");
     result = result.stringByReplacingOccurrencesOfString("$", withString: "redirect(");
     return result

@@ -8,12 +8,12 @@
 
 import Foundation
 
-func search(basePath: String = ".") -> [String] {
+func search(basePath: String = ".", fileExtension: String) -> [String] {
     let args = [String](Process.arguments)
     
     let task = NSTask()
     task.launchPath = "/usr/bin/find"
-    task.arguments = ["\(args[1])", "\"*.yaml\""]
+    task.arguments = ["\(args[1])", "\"*.\(fileExtension)\""]
     let pipe = NSPipe()
     task.standardOutput = pipe
     task.standardError = nil
@@ -21,9 +21,13 @@ func search(basePath: String = ".") -> [String] {
     
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
     let output: String = String(data: data, encoding: NSUTF8StringEncoding)!
-    let files = output.componentsSeparatedByString("\n").filter() { return $0.hasSuffix(".yaml") }
+    let files = output.componentsSeparatedByString("\n").filter() { return $0.hasSuffix(".\(fileExtension)") }
     
     return files
+}
+
+func search(basePath: String = ".") -> [String] {
+    return search(basePath, fileExtension: "yaml") + search(basePath, fileExtension: "yml")
 }
 
 func rm(file: String) {
@@ -76,9 +80,9 @@ var args = [String](Process.arguments)
 
 if args.count == 1 {
     print("\n")
-    print("usage: sgen PROJECT_PATH (--platform ios|osx) (--extensions) (--objc)")
+    print("usage: sgen PROJECT_PATH (--platform ios|osx) (--extensions internal|public) (--objc)")
     print("--platform: Select the target platform")
-    print("--extension: Creates protocol extensions for the generated appearance proxies")
+    print("--extensions: Creates protocol extensions for the generated appearance proxies")
     print("--objc: Still generate Swift code, but accessible from ObjC")
     print("\n")
     exit(1)
@@ -86,7 +90,8 @@ if args.count == 1 {
 
 //configuration
 if args.contains("--objc") { Configuration.objcGeneration = true }
-if args.contains("--extensions") { Configuration.extensions = true }
+if args.contains("--extensions") { Configuration.extensionsEnabled = true }
+if args.contains("public") { Configuration.publicExtensions = true }
 if args.contains("--platform") && args.contains("osx") { Configuration.targetOsx = true }
 
 let path = args[1]

@@ -8,6 +8,13 @@ Typography:
   small: Font("Helvetica", 12)
   medium: Font("Helvetica", 18)
 
-FooView:
-  background: $Color.red
+DefaultButton < FooView:
+  margin: 12
+  opaque: false
+  color: $Color.blue
+
+Extension.FooView:
+  margin: 12
+  opaque: true
   font: $Typography.small
+  backgroundColor: $Color.red

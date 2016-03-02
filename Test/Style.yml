@@ -1,0 +1,20 @@
+Color:
+  red:
+    "idiom = phone and width < 300": "#ffcc00"
+    "idiom = phone and width > 300": "#ffcc00"
+    "default": "#ffcc00"
+  blue: "#aabbcc20"
+
+Typography:
+  small: Font("System", 12)
+  medium: Font("System", 18)
+
+Extension.DefaultButton < FooView:
+  margin: 12
+  opaque: false
+  color: $Color.blue
+
+Extension.FooView:
+  margin: 12
+  opaque: true
+  font: $Typography.small

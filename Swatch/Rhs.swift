@@ -8,27 +8,29 @@
 
 import Foundation
 
-internal struct Rhs {
+struct Rhs {
     
-    internal enum ColorInputError : ErrorType {
+    enum ColorInputError : ErrorType {
         case MissingHashMarkAsPrefix, UnableToScanHexValue, MismatchedHexStringLength
     }
     
-    internal class Color {
+    class Color {
         
-        internal let red: Float
-        internal let green: Float
-        internal let blue: Float
-        internal let alpha: Float
+        let red: Float
+        let green: Float
+        let blue: Float
+        let alpha: Float
+        var darken: Bool? = false
+        var lighten: Bool? = false
         
-        internal init(red: Float, green: Float, blue: Float, alpha: Float) {
+        init(red: Float, green: Float, blue: Float, alpha: Float) {
             self.red = red
             self.green = green
             self.blue = blue
             self.alpha = alpha
         }
         
-        internal convenience init(hex3: UInt16, alpha: Float = 1) {
+        convenience init(hex3: UInt16, alpha: Float = 1) {
             let divisor = Float(15)
             let red     = Float((hex3 & 0xF00) >> 8) / divisor
             let green   = Float((hex3 & 0x0F0) >> 4) / divisor
@@ -36,7 +38,7 @@ internal struct Rhs {
             self.init(red: red, green: green, blue: blue, alpha: alpha)
         }
         
-        internal convenience init(hex4: UInt16) {
+        convenience init(hex4: UInt16) {
             let divisor = Float(15)
             let red     = Float((hex4 & 0xF000) >> 12) / divisor
             let green   = Float((hex4 & 0x0F00) >>  8) / divisor
@@ -45,7 +47,7 @@ internal struct Rhs {
             self.init(red: red, green: green, blue: blue, alpha: alpha)
         }
         
-        internal convenience init(hex6: UInt32, alpha: Float = 1) {
+        convenience init(hex6: UInt32, alpha: Float = 1) {
             let divisor = Float(255)
             let red     = Float((hex6 & 0xFF0000) >> 16) / divisor
             let green   = Float((hex6 & 0x00FF00) >>  8) / divisor
@@ -53,7 +55,7 @@ internal struct Rhs {
             self.init(red: red, green: green, blue: blue, alpha: alpha)
         }
         
-        internal convenience init(hex8: UInt32) {
+        convenience init(hex8: UInt32) {
             let divisor = Float(255)
             let red     = Float((hex8 & 0xFF000000) >> 24) / divisor
             let green   = Float((hex8 & 0x00FF0000) >> 16) / divisor
@@ -62,7 +64,7 @@ internal struct Rhs {
             self.init(red: red, green: green, blue: blue, alpha: alpha)
         }
         
-        internal convenience init(rgba_throws rgba: String) throws {
+        convenience init(rgba_throws rgba: String) throws {
             guard rgba.hasPrefix("#") else {
                 throw ColorInputError.MissingHashMarkAsPrefix
             }
@@ -92,11 +94,11 @@ internal struct Rhs {
             }
         }
         
-        internal convenience init(rgba: String) {
+        convenience init(rgba: String) {
             try! self.init(rgba_throws: rgba)
         }
         
-        internal func hexString(includeAlpha: Bool) -> String {
+        func hexString(includeAlpha: Bool) -> String {
             let r: Float = self.red
             let g: Float = self.green
             let b: Float = self.blue
@@ -109,25 +111,25 @@ internal struct Rhs {
             }
         }
         
-        internal var description: String {
+        var description: String {
             return self.hexString(true)
         }
         
-        internal var debugDescription: String {
+        var debugDescription: String {
             return self.hexString(true)
         }
     }
     
-    internal class Font {
+    class Font {
         
-        internal let fontName: String
-        internal let fontSize: Float
+        let fontName: String
+        let fontSize: Float
         
-        internal var isSystemFont: Bool {
+        var isSystemFont: Bool {
             return self.fontName.containsString("System")
         }
         
-        internal var isSystemBoldFont: Bool {
+        var isSystemBoldFont: Bool {
             return self.fontName.containsString("SystemBold")
         }
         

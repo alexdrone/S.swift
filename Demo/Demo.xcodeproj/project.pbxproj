@@ -161,7 +161,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "sgen $SRCROOT";
+			shellScript = "$SRCROOT/../sgen $SRCROOT --platform ios --extensions";
 		};
 /* End PBXShellScriptBuildPhase section */
 

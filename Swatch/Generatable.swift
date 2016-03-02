@@ -9,19 +9,14 @@
 import Foundation
 
 //MARK: Rhs
-public struct Configuration {
-    public static var objcGeneration = false
-    public static var extensions = false
-    public static var targetOsx = false
-}
 
-internal enum RhsError: ErrorType {
+ enum RhsError: ErrorType {
     case MalformedRhsValue(error: String)
     case MalformedCondition(error: String)
     case Internal
 }
 
-internal enum RhsValue {
+ enum RhsValue {
     
     ///A scalar float value
     case Scalar(float: Float)
@@ -67,15 +62,15 @@ internal enum RhsValue {
     
     ///Returns a enum with the given payload
     
-    internal static func valueFrom(scalar: Float) -> RhsValue  {
+     static func valueFrom(scalar: Float) -> RhsValue  {
         return .Scalar(float: Float(scalar))
     }
 
-    internal static func valueFrom(boolean: Bool) -> RhsValue  {
+     static func valueFrom(boolean: Bool) -> RhsValue  {
         return .Boolean(bool: boolean)
     }
     
-    internal static func valueFrom(hash: [Yaml: Yaml]) throws -> RhsValue  {
+     static func valueFrom(hash: [Yaml: Yaml]) throws -> RhsValue  {
         var conditions = [Condition: RhsValue]()
         for (k, value) in hash {
             
@@ -98,7 +93,7 @@ internal enum RhsValue {
         return .Hash(hash: conditions)
     }
     
-    internal static func valueFrom(string: String) throws  -> RhsValue  {
+     static func valueFrom(string: String) throws  -> RhsValue  {
         
         if let components = argumentsFromString("font", string: string) {
             assert(components.count == 2)
@@ -107,7 +102,7 @@ internal enum RhsValue {
         } else if let components = argumentsFromString("color", string: string) {
             assert(components.count == 1)
             return .Color(color: Rhs.Color(rgba: "#\(components[0])"))
-            
+                        
         } else if let components = argumentsFromString("image", string: string) {
             assert(components.count == 1)
             return .Image(image: components[0])
@@ -122,7 +117,7 @@ internal enum RhsValue {
     
     ///The reuturn value for this expression
     
-    internal func returnValue() -> String {
+     func returnValue() -> String {
 
         switch self {
         case .Scalar(_): return "Float"
@@ -137,7 +132,7 @@ internal enum RhsValue {
     }
 }
 
-internal class RhsRedirectValue {
+ class RhsRedirectValue {
     private var redirection: String
     private var type: String
     
@@ -151,7 +146,7 @@ internal class RhsRedirectValue {
 
 extension RhsValue: Generatable {
 
-    internal func generate() -> String {
+     func generate() -> String {
         
         let indentation = "\n\t\t\t"
         let prefix = "\(indentation)return "
@@ -179,7 +174,7 @@ extension RhsValue: Generatable {
             var string = ""
             for (condition, rhs) in hash {
                 if !condition.isDefault() {
-                    string += "\(indentation)if \(condition.generate()) { \(rhs.generate()) }"
+                    string += "\(indentation)if \(condition.generate()) { \(rhs.generate())\(indentation)}"
                 }
             }
             //default should be the last condition
@@ -225,9 +220,9 @@ extension RhsValue: Generatable {
     
     func generateRedirection(prefix: String, redirection: RhsRedirectValue) -> String {
         if Configuration.targetOsx {
-            return "\(prefix)\(redirection.redirection)In()"
+            return "\(prefix)\(redirection.redirection)Property()"
         } else {
-            return "\(prefix)\(redirection.redirection)In(traitCollection)"
+            return "\(prefix)\(redirection.redirection)Property(traitCollection)"
         }
     }
     
@@ -235,13 +230,13 @@ extension RhsValue: Generatable {
 
 //MARK: Property
 
-internal class Property {
+ class Property {
     
-    internal var rhs: RhsValue
-    internal let key: String
-    internal var isOverride: Bool = false
+     var rhs: RhsValue
+     let key: String
+     var isOverride: Bool = false
     
-    internal init(key: String, rhs: RhsValue) {
+     init(key: String, rhs: RhsValue) {
         self.rhs = rhs
         self.key = key
     }
@@ -249,11 +244,11 @@ internal class Property {
 
 extension Property: Generatable {
     
-    internal func generate() -> String {
+     func generate() -> String {
         var method = ""
         method += "\n\n\t\t//MARK: \(self.key) "
         if !self.isOverride {
-            method += "\n\t\tprivate var __\(self.key): \(self.rhs.returnValue())?"
+            method += "\n\t\tprivate var _\(self.key): \(self.rhs.returnValue())?"
         }
         
         //options
@@ -262,15 +257,15 @@ extension Property: Generatable {
         let methodPublic = self.rhs.isHash ? "public" : "private"
         let override = self.isOverride ? "override " : ""
         
-        method += "\n\t\t\(override)\(methodPublic) func \(self.key)In(\(methodArgs)) -> \(self.rhs.returnValue()) {"
-        method += "\n\t\t\tif let override = __\(self.key) { return override }"
+        method += "\n\t\t\(override)\(methodPublic) func \(self.key)Property(\(methodArgs)) -> \(self.rhs.returnValue()) {"
+        method += "\n\t\t\tif let override = _\(self.key) { return override }"
         method += "\(rhs.generate())"
         method += "\n\t\t}"
         
         if !self.isOverride {
             method += "\n\t\t\(objc)public var \(self.key): \(self.rhs.returnValue()) {"
-            method += "\n\t\t\tget { return self.\(self.key)In() }"
-            method += "\n\t\t\tset { __\(self.key) = newValue }"
+            method += "\n\t\t\tget { return self.\(self.key)Property() }"
+            method += "\n\t\t\tset { _\(self.key) = newValue }"
             method += "\n\t\t}"
         }
         return method
@@ -279,15 +274,23 @@ extension Property: Generatable {
 
 //MARK: Style
 
-internal class Style {
+ class Style {
     
-    internal let name: String
-    internal var superclassName: String? = nil
-    internal let properties: [Property]
+     let name: String
+     var superclassName: String? = nil
+     let properties: [Property]
+     var isExtension = false
     
-    internal init(name: String, properties: [Property]) {
+     init(name: String, properties: [Property]) {
         
         var styleName = name.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+        
+        //check if this could generate an extension
+        let extensionPrefix = "Extension."
+        if styleName.containsString(extensionPrefix) {
+            styleName = styleName.stringByReplacingOccurrencesOfString(extensionPrefix, withString: "")
+            self.isExtension = true
+        }
         
         //superclass defined
         if let components = Optional(styleName.componentsSeparatedByString("<")) where components.count == 2 {
@@ -302,14 +305,14 @@ internal class Style {
 
 extension Style: Generatable {
     
-    internal func generate() -> String {
+     func generate() -> String {
         var wrapper = ""
         wrapper += "//MARK: - \(self.name)"
         let objc = Configuration.objcGeneration ? "@objc " : ""
         var superclass = Configuration.objcGeneration ? ": NSObject" : ""
-        if let s = self.superclassName { superclass = ": \(s)Style" }
-        wrapper += "\n\t\(objc)public static let \(self.name) = \(self.name)Style()"
-        wrapper += "\n\t\(objc)public class \(self.name)Style\(superclass) {"
+        if let s = self.superclassName { superclass = ": \(s)AppearanceProxy" }
+        wrapper += "\n\t\(objc)public static let \(self.name) = \(self.name)AppearanceProxy()"
+        wrapper += "\n\t\(objc)public class \(self.name)AppearanceProxy\(superclass) {"
         for property in self.properties {
             wrapper += property.generate()
         }
@@ -320,12 +323,12 @@ extension Style: Generatable {
 
 //MARK: Stylesheet
 
-internal class Stylesheet {
+ class Stylesheet {
     
-    internal let name: String
-    internal let styles: [Style]
+     let name: String
+     let styles: [Style]
     
-    internal init(name: String, styles: [Style]) {
+     init(name: String, styles: [Style]) {
         
         self.name = name
         self.styles = styles
@@ -383,7 +386,7 @@ internal class Stylesheet {
 
 extension Stylesheet: Generatable {
 
-    internal func generate() -> String {
+     func generate() -> String {
         var stylesheet = ""
         
         let objc = Configuration.objcGeneration ? "@objc " : ""
@@ -392,14 +395,65 @@ extension Stylesheet: Generatable {
         
         stylesheet += "///Autogenerated file\n"
         stylesheet += "\nimport \(importDef)\n\n"
+        
+        if Configuration.extensionsEnabled {
+            stylesheet += self.generateExtensionsHeader()
+        }
+        
         stylesheet += "///Entry point for the app stylesheet\n"
         stylesheet += "\(objc)public class \(self.name)\(superclass) {\n\n"
         for style in self.styles {
             stylesheet += style.generate()
         }
         stylesheet += "\n}"
+        
+        if Configuration.extensionsEnabled {
+            stylesheet += self.generateExtensions()
+        }
+        
         return stylesheet
     }
+    
+    func generateExtensionsHeader() -> String {
+        var header = ""
+        header += "private var __ApperanceProxyHandle: UInt8 = 0\n\n"
+        header += "///Your view should conform to 'AppearaceProxyComponent' in order to expose an appearance proxy\n"
+        header += "public protocol AppearaceProxyComponent: class {\n"
+        header += "\ttypealias ApperanceProxyType\n"
+        header += "\tvar appearanceProxy: ApperanceProxyType { get }\n"
+        header += "\tfunc didChangeAppearanceProxy()"
+        header += "\n}\n\n"
+        header += "extension AppearaceProxyComponent {\n"
+        header += "\tfunc didChangeAppearanceProxy() { print(\"\\(__FUNCTION__) not implemented in \\(self.dynamicType)\") }"
+        header += "\n}\n\n"
+
+        return header
+    }
+    
+    func generateExtensions() -> String {
+        var extensions = ""
+        for style in self.styles.filter({ $0.isExtension }) {
+            let visibility = Configuration.publicExtensions ? "public" : ""
+            extensions += "\nextension \(style.name): AppearaceProxyComponent {\n\n"
+            extensions += "\t\(visibility) typealias ApperanceProxyType = S.\(style.name)AppearanceProxy\n"
+            extensions += "\t\(visibility) var appearanceProxy: ApperanceProxyType {\n"
+            extensions += "\t\tget {\n"
+            extensions += "\t\t\tguard let proxy = objc_getAssociatedObject(self, &__ApperanceProxyHandle) as? ApperanceProxyType else { return S.\(style.name) }\n"
+            extensions += "\t\t\treturn proxy\n"
+            extensions += "\t\t}\n"
+            extensions += "\t\tset {\n"
+            extensions += "\t\t\tobjc_setAssociatedObject(self, &__ApperanceProxyHandle, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)\n"
+            extensions += "\t\t\tdidChangeAppearanceProxy()\n"
+            extensions += "\t\t}\n"
+            extensions += "\t}\n"
+            extensions += "}\n\n"
+        }
+        
+        return extensions
+    }
+    
+    
+    
 
 }
 

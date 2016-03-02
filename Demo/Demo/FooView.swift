@@ -12,7 +12,11 @@ class FooView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = S.FooView.background
+        self.didChangeAppearanceProxy()
+    }
+    
+    func didChangeAppearanceProxy() {
+        self.backgroundColor = self.appearanceProxy.backgroundColor
     }
 
     required init?(coder aDecoder: NSCoder) {

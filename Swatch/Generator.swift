@@ -8,6 +8,14 @@
 
 import Foundation
 
+public struct Configuration {
+    public static var objcGeneration = false
+    public static var extensionsEnabled = false
+    public static var publicExtensions = false
+    public static var targetOsx = false
+}
+
+
 public enum GeneratorError: ErrorType {
     case FileDoesNotExist(error: String)
     case MalformedYaml(error: String)

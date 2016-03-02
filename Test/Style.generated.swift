@@ -6,124 +6,126 @@ import Cocoa
 @objc public class S: NSObject {
 
 //MARK: - Typography
-	@objc public static let Typography = TypographyStyle()
-	@objc public class TypographyStyle: NSObject {
+	@objc public static let Typography = TypographyAppearanceProxy()
+	@objc public class TypographyAppearanceProxy: NSObject {
 
 		//MARK: small 
-		private var __small: NSFont?
-		private func smallIn() -> NSFont {
-			if let override = __small { return override }
+		private var _small: NSFont?
+		private func smallProperty() -> NSFont {
+			if let override = _small { return override }
 			return NSFont.systemFontOfSize(12.0)
 		}
 		@objc public var small: NSFont {
-			get { return self.smallIn() }
-			set { __small = newValue }
+			get { return self.smallProperty() }
+			set { _small = newValue }
 		}
 
 		//MARK: medium 
-		private var __medium: NSFont?
-		private func mediumIn() -> NSFont {
-			if let override = __medium { return override }
+		private var _medium: NSFont?
+		private func mediumProperty() -> NSFont {
+			if let override = _medium { return override }
 			return NSFont.systemFontOfSize(18.0)
 		}
 		@objc public var medium: NSFont {
-			get { return self.mediumIn() }
-			set { __medium = newValue }
+			get { return self.mediumProperty() }
+			set { _medium = newValue }
 		}
 	}
-//MARK: - DefaultButton
-	@objc public static let DefaultButton = DefaultButtonStyle()
-	@objc public class DefaultButtonStyle: ButtonStyle {
+//MARK: - FooView
+	@objc public static let FooView = FooViewAppearanceProxy()
+	@objc public class FooViewAppearanceProxy: NSObject {
 
 		//MARK: opaque 
-		override private func opaqueIn() -> Bool {
-			if let override = __opaque { return override }
-			return false
-		}
-
-		//MARK: margin 
-		override private func marginIn() -> Float {
-			if let override = __margin { return override }
-			return Float(12.0)
-		}
-
-		//MARK: color 
-		private var __color: NSColor?
-		private func colorIn() -> NSColor {
-			if let override = __color { return override }
-			return Color.blueIn()
-		}
-		@objc public var color: NSColor {
-			get { return self.colorIn() }
-			set { __color = newValue }
-		}
-	}
-//MARK: - Button
-	@objc public static let Button = ButtonStyle()
-	@objc public class ButtonStyle: NSObject {
-
-		//MARK: opaque 
-		private var __opaque: Bool?
-		private func opaqueIn() -> Bool {
-			if let override = __opaque { return override }
+		private var _opaque: Bool?
+		private func opaqueProperty() -> Bool {
+			if let override = _opaque { return override }
 			return true
 		}
 		@objc public var opaque: Bool {
-			get { return self.opaqueIn() }
-			set { __opaque = newValue }
+			get { return self.opaqueProperty() }
+			set { _opaque = newValue }
 		}
 
 		//MARK: margin 
-		private var __margin: Float?
-		private func marginIn() -> Float {
-			if let override = __margin { return override }
+		private var _margin: Float?
+		private func marginProperty() -> Float {
+			if let override = _margin { return override }
 			return Float(12.0)
 		}
 		@objc public var margin: Float {
-			get { return self.marginIn() }
-			set { __margin = newValue }
+			get { return self.marginProperty() }
+			set { _margin = newValue }
 		}
 
 		//MARK: font 
-		private var __font: NSFont?
-		private func fontIn() -> NSFont {
-			if let override = __font { return override }
-			return Typography.smallIn()
+		private var _font: NSFont?
+		private func fontProperty() -> NSFont {
+			if let override = _font { return override }
+			return Typography.smallProperty()
 		}
 		@objc public var font: NSFont {
-			get { return self.fontIn() }
-			set { __font = newValue }
+			get { return self.fontProperty() }
+			set { _font = newValue }
 		}
 	}
 //MARK: - Color
-	@objc public static let Color = ColorStyle()
-	@objc public class ColorStyle: NSObject {
+	@objc public static let Color = ColorAppearanceProxy()
+	@objc public class ColorAppearanceProxy: NSObject {
 
 		//MARK: blue 
-		private var __blue: NSColor?
-		private func blueIn() -> NSColor {
-			if let override = __blue { return override }
-			return NSColor(red: 0.666667, green: 0.733333, blue: 0.8, alpha: 1.0)
+		private var _blue: NSColor?
+		private func blueProperty() -> NSColor {
+			if let override = _blue { return override }
+			return NSColor(red: 0.666667, green: 0.733333, blue: 0.8, alpha: 0.12549)
 		}
 		@objc public var blue: NSColor {
-			get { return self.blueIn() }
-			set { __blue = newValue }
+			get { return self.blueProperty() }
+			set { _blue = newValue }
 		}
 
 		//MARK: red 
-		private var __red: NSColor?
-		public func redIn() -> NSColor {
-			if let override = __red { return override }
+		private var _red: NSColor?
+		public func redProperty() -> NSColor {
+			if let override = _red { return override }
 			if NSApplication.sharedApplication().mainWindow?.frame.size.width > 300.0  { 
-			return NSColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) }
+			return NSColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0)
+			}
 			if NSApplication.sharedApplication().mainWindow?.frame.size.width < 300.0  { 
-			return NSColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) }
+			return NSColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0)
+			}
 			
 			return NSColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0)
 		}
 		@objc public var red: NSColor {
-			get { return self.redIn() }
-			set { __red = newValue }
+			get { return self.redProperty() }
+			set { _red = newValue }
+		}
+	}
+//MARK: - DefaultButton
+	@objc public static let DefaultButton = DefaultButtonAppearanceProxy()
+	@objc public class DefaultButtonAppearanceProxy: FooViewAppearanceProxy {
+
+		//MARK: opaque 
+		override private func opaqueProperty() -> Bool {
+			if let override = _opaque { return override }
+			return false
+		}
+
+		//MARK: margin 
+		override private func marginProperty() -> Float {
+			if let override = _margin { return override }
+			return Float(12.0)
+		}
+
+		//MARK: color 
+		private var _color: NSColor?
+		private func colorProperty() -> NSColor {
+			if let override = _color { return override }
+			return Color.blueProperty()
+		}
+		@objc public var color: NSColor {
+			get { return self.colorProperty() }
+			set { _color = newValue }
 		}
 	}
 
