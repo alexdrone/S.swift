@@ -85,6 +85,8 @@ if args.count == 1 {
     print("--extensions: Creates extensions for the views that have a style defined in the stylesheet. *public* and *internal* define what the extensions' visibility modifier should be.")
     print("--objc: generates **Swift** code that is interoperable with **Objective C**")
     print("\n")
+    print("If you wish to **update** the generator, copy and paste this in your terminal:")
+    print("curl \"https://raw.githubusercontent.com/alexdrone/S/master/sgen\" > sgen && mv sgen /usr/local/bin/sgen && chmod +x /usr/local/bin/sgen\n\n")
     exit(1)
 }
 
