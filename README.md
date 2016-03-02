@@ -102,7 +102,7 @@ In addition you can specify to generate code accessible from ObjC code.
 ```
 usage: sgen PROJECT_PATH (--platform ios|osx) (--extensions) (--objc)
 --platform: Select the target platform
---extension: Creates protocol extensions for the generated appearance proxies
+--extensions: Creates protocol extensions for the generated appearance proxies
 --objc: Still generate Swift code, but accessible from ObjC
 ```
 
