@@ -34,7 +34,7 @@ FooView:
 ```
 <sup>Check out Style.yaml in the Demo project to see more examples of property definitions. Many more constructs such as inheritance and extensions are available.</sub>
 
-is transformed into a strongly typed, stylesheet in swift
+is transformed into a strongly typed, stylesheet in swift (**for brevity's sake only the interface of the generated code is shown below**)
 
 ```swift 
 
