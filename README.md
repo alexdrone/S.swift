@@ -6,11 +6,9 @@
 [![Build](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 
 
-_Get strong typed, autocompleted resources, color swatches and font styles in Swift projects from a simple, human readable Yaml stylesheet_
+_Get strong typed, autocompleted resources, color swatches and font styles in Swift projects (iOS or OSX) from a simple, human readable Yaml stylesheet_
 
-**S** is inspired from *(and complementary to)* **[R](https://github.com/mac-cain13/R.swift)**.
-
-**S** is just a lightweight tool to generate code, you don't have to import any framework in your project!
+**[S](#)** is inspired from *(and complementary to)* **[R](https://github.com/mac-cain13/R.swift)** and it is just a command line tool — *you don't have to import any framework in your project*!
 
 ## Overview
 
@@ -33,7 +31,7 @@ FooView:
   defaultMargin: 10
 
 ```
-<sup>Check out Style.yaml in the Demo project to see more examples of property definitions.</sub>
+<sup>Check out Style.yaml in the Demo project to see more examples of property definitions. Many more constructs such as inheritance and extensions are available.</sub>
 
 is transformed into a strongly typed, stylesheet in swift
 
@@ -41,28 +39,29 @@ is transformed into a strongly typed, stylesheet in swift
 
 ///Entry point for the app stylesheet
 struct S {
-	static let Color = ColorStyle()
-	struct ColorStyle {
 
+	//MARK: Color
+	static let Color = ColorAppearanceProxy()
+	struct ColorAppearanceProxy {
 		let blue = UIColor(red: 0.0, green: 1.0, blue: 0.0)
 		var red: UIColor { return self.redWithTraitCollection() }
-
-		func redWithTraitCollection(trait: UITraitCollection? = UIScreen.mainScreen().traitCollection) -> UIColor {
-			let device = UIDevice.currentDevice()
-			if device.userInterfaceIdiom == .Phone  && trait?.horizontalSizeClass == .Compact {
+		func red(trait: UITraitCollection? = UIScreen.mainScreen().traitCollection) -> UIColor {
+			if UIDevice.currentDevice().userInterfaceIdiom == .Phone  && trait?.horizontalSizeClass == .Compact {
              	return UIColor(red: 0.8, green: 0, blue: 0)
             	}
 			return UIColor(red: 1, green: 0, blue: 0)
 		}
 	}
     
-	static let Typography = TypographyStyle()
+    	//MARK: Typography
+	static let Typography = TypographyAppearanceProxy()
 	struct TypographyStyle {
 		let small = UIFont(name: "Helvetica", size: 12.0)!
 	}
 	
-	static let FooView = FooViewStyle()
-	struct FooViewStyle {
+	//MARK: FooView
+	static let FooView = FooViewAppearanceProxy()
+	struct FooViewAppearanceProxy {
 		var background: UIColor { return Color.red  }
 		var font: UIFont { return Typography.small }
 		let defaultMargin: CGFloat = 10 
@@ -71,20 +70,18 @@ struct S {
 }
 
 ```
-<sup>The actual code is a bit more complex because it supports styles inheritance and setting the properties from the outside. Also there are different code-generation options that can be passed as argument to the generator. Check out Style.generated.swift in the Demo project.</sub>
+<sup>The actual generated code could be a bit more complex — **S** supports appearance proxy inheritance, properties override and extensions generation for your views. These are all different code-generation options that can be passed as argument to the generator. Check out Style.generated.swift in the Demo project.</sub>
 
-You can access to a property (in this example Color.red) it by simply typing `S.Color.red` in your code.
+You can access to a stylesheet property (in this example `Color.red`) by simply referring to as `S.Color.red` in your code.
 
-The stylesheet supports colors (with some helper function like darken, lighten, gradient), fonts, images, metrics and bools.
+The stylesheet supports colors, fonts, images, metrics and bools.
 
-
-Like in the example above, S supports complex conditions for the value that take the screen size, the size class and the user interaction idiom into account.
-(`S.Color.red` could be a different value given a different screen size/size class/idiom). See the stylesheet section for more info about it.
+Like in the example shown above, **S** supports conditions for the value that take the screen size, the size class and the user interaction idiom into account.
+(in this case `S.Color.red` is a different value given a different screen size/size class/idiom). See the stylesheet section for more info about it.
 
 
 ## Installation
-One line installation.
-Copy and paste this in your terminal.
+*One liner.* Copy and paste this in your terminal.
 
 ```
 curl "https://raw.githubusercontent.com/alexdrone/S/master/sgen" > sgen && mv sgen /usr/local/bin/sgen && chmod +x /usr/local/bin/sgen 
@@ -96,19 +93,20 @@ sgen $SRCROOT
 ```
 
 ### Advanced usage
-**S** can generate swift code for both iOS and OSX. 
-In addition you can specify to generate code accessible from ObjC code.
 
 ```
-usage: sgen PROJECT_PATH (--platform ios|osx) (--extensions) (--objc)
---platform: Select the target platform
---extensions: Creates protocol extensions for the generated appearance proxies
---objc: Still generate Swift code, but accessible from ObjC
+sgen PROJECT_PATH (--platform ios|osx) (--extensions internal|public) (--objc)
+
 ```
+
+- `--platform [osx,ios]` use the **platform** argument to target the desired platform. The default one is **iOS**.
+- `--objc` Generates **Swift** code that is interoperable with **Objective C** (`@objc` modifier, `NSObject` subclasses)
+- `--extensions [internal,public]` Creates extensions for the views that have a style defined in the stylesheet. *public* and *internal* define what the extensions' visibility modifier should be.
+
 
 ## Adding S as a build script
 
-You can integrate **S** in your build pashes by adding it as a build script.
+You can integrate **S** in your build phases by adding it as a build script.
 
 - Click on your **TARGET** abd go the **Build Phases** tab.
 - Click on the **+** and select **New Run Script Phase** 
@@ -122,12 +120,12 @@ You can integrate **S** in your build pashes by adding it as a build script.
 <p align="center">
 ![GitHub Logo](Doc/screen_2.jpg)
 
-- Now you can create your `.yaml` stylesheet. Make sure it is placed inside your project source root (`$SRCROOT`)
+- Now you can create your `.yml` stylesheet. Make sure it is placed inside your project source root (`$SRCROOT`)
 
 <p align="center">
 ![GitHub Logo](Doc/screen_3.jpg)
 
-- The first time you build your target (with `cmd + B`) you need to drag the generated file inside the project. The generated swift file sits next to your stylesheet so, simply right click on your yaml stylesheet and select **Show in Finder** and drag the  `*.generated.swift` file inside your project
+- The first time you build your target (with `cmd + B`) drag the generated file inside the project. The generated swift file sits next to your stylesheet so, simply right click on your yaml stylesheet, select **Show in Finder** and drag the  `*.generated.swift` file inside your project
 
 
 <p align="center">
@@ -137,7 +135,7 @@ You can integrate **S** in your build pashes by adding it as a build script.
 
 ## Stylesheet 
 
-The following is the grammaer of the YAML stylesheet.
+The following is the grammar for the YAML stylesheet.
 Is supports simple values (bool, metrics, fonts, colors, images), conditional values and redirects (by simply using $ + Section.key)
 
 ```yaml

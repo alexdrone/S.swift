@@ -81,9 +81,9 @@ var args = [String](Process.arguments)
 if args.count == 1 {
     print("\n")
     print("usage: sgen PROJECT_PATH (--platform ios|osx) (--extensions internal|public) (--objc)")
-    print("--platform: Select the target platform")
-    print("--extensions: Creates protocol extensions for the generated appearance proxies")
-    print("--objc: Still generate Swift code, but accessible from ObjC")
+    print("--platform: use the **platform** argument to target the desired platform. The default one is **ios**")
+    print("--extensions: Creates extensions for the views that have a style defined in the stylesheet. *public* and *internal* define what the extensions' visibility modifier should be.")
+    print("--objc: generates **Swift** code that is interoperable with **Objective C**")
     print("\n")
     exit(1)
 }
