@@ -41,38 +41,30 @@ is transformed into a strongly typed, stylesheet in swift
 ///Entry point for the app stylesheet
 struct S {
 
-	//MARK: Color
-	static let Color = ColorAppearanceProxy()
-	struct ColorAppearanceProxy {
-		let blue = UIColor(red: 0.0, green: 1.0, blue: 0.0)
-		var red: UIColor { return self.redWithTraitCollection() }
-		func red(trait: UITraitCollection? = UIScreen.mainScreen().traitCollection) -> UIColor {
-			if UIDevice.currentDevice().userInterfaceIdiom == .Phone  && trait?.horizontalSizeClass == .Compact {
-             	return UIColor(red: 0.8, green: 0, blue: 0)
-            	}
-			return UIColor(red: 1, green: 0, blue: 0)
-		}
-	}
+    public static struct let Color: S.S.ColorAppearanceProxy
+    public struct ColorAppearanceProxy {
+        public var blue: UIColor { get set }
+        public func redProperty(traitCollection: UITraitCollection? = default) -> UIColor
+        public var red: UIColor { get set }
+    }
     
-    	//MARK: Typography
-	static let Typography = TypographyAppearanceProxy()
-	struct TypographyStyle {
-		let small = UIFont(name: "Helvetica", size: 12.0)!
-	}
-	
-	//MARK: FooView
-	static let FooView = FooViewAppearanceProxy()
-	struct FooViewAppearanceProxy {
-		var background: UIColor { return Color.red  }
-		var font: UIFont { return Typography.small }
-		let defaultMargin: CGFloat = 10 
-		let textAlignment = NSTextAlignment.Center
-	}
-    
+    public static struct let Typography: S.S.TypographyAppearanceProxy
+    public struct TypographyAppearanceProxy {
+        public var small: UIFont { get set }
+    }
+
+    public static struct let FooView: S.S.FooViewAppearanceProxy
+    public struct FooViewAppearanceProxy {
+        public var margin: Float { get set }
+        public var font: UIFont { get set }
+        public var opaque: Bool { get set }
+        public var textAlignment: NSTextAlignment { get set }
+    }
 }
 
+
 ```
-<sup>The actual generated code could be a bit more complex — **S** supports appearance proxy inheritance, properties override and extensions generation for your views. These are all different code-generation options that can be passed as argument to the generator. Check out Style.generated.swift in the Demo project.</sub>
+<sup>**S** supports appearance proxy inheritance, properties override and extensions generation for your views. These are all different code-generation options that can be passed as argument to the generator. Check out Style.generated.swift in the Demo project.</sub>
 
 You can access to a stylesheet property (in this example `Color.red`) by simply referring to as `S.Color.red` in your code.
 

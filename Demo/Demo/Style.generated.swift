@@ -3,11 +3,11 @@
 import Cocoa
 
 ///Entry point for the app stylesheet
-@objc public class S: NSObject {
+public class S {
 
 //MARK: - DefaultButton
-	@objc public static let DefaultButton = DefaultButtonAppearanceProxy()
-	@objc public class DefaultButtonAppearanceProxy: FooViewAppearanceProxy {
+	public static let DefaultButton = DefaultButtonAppearanceProxy()
+	public class DefaultButtonAppearanceProxy: FooViewAppearanceProxy {
 
 		//MARK: opaque 
 		override private func opaqueProperty() -> Bool {
@@ -27,14 +27,14 @@ import Cocoa
 			if let override = _color { return override }
 			return Color.blueProperty()
 		}
-		@objc public var color: NSColor {
+		public var color: NSColor {
 			get { return self.colorProperty() }
 			set { _color = newValue }
 		}
 	}
 //MARK: - Typography
-	@objc public static let Typography = TypographyAppearanceProxy()
-	@objc public class TypographyAppearanceProxy: NSObject {
+	public static let Typography = TypographyAppearanceProxy()
+	public class TypographyAppearanceProxy {
 
 		//MARK: small 
 		private var _small: NSFont?
@@ -42,7 +42,7 @@ import Cocoa
 			if let override = _small { return override }
 			return NSFont(name: "Helvetica", size: 12.0)!
 		}
-		@objc public var small: NSFont {
+		public var small: NSFont {
 			get { return self.smallProperty() }
 			set { _small = newValue }
 		}
@@ -53,14 +53,14 @@ import Cocoa
 			if let override = _medium { return override }
 			return NSFont(name: "Helvetica", size: 18.0)!
 		}
-		@objc public var medium: NSFont {
+		public var medium: NSFont {
 			get { return self.mediumProperty() }
 			set { _medium = newValue }
 		}
 	}
 //MARK: - FooView
-	@objc public static let FooView = FooViewAppearanceProxy()
-	@objc public class FooViewAppearanceProxy: NSObject {
+	public static let FooView = FooViewAppearanceProxy()
+	public class FooViewAppearanceProxy {
 
 		//MARK: backgroundColor 
 		private var _backgroundColor: NSColor?
@@ -68,7 +68,7 @@ import Cocoa
 			if let override = _backgroundColor { return override }
 			return Color.redProperty()
 		}
-		@objc public var backgroundColor: NSColor {
+		public var backgroundColor: NSColor {
 			get { return self.backgroundColorProperty() }
 			set { _backgroundColor = newValue }
 		}
@@ -79,7 +79,7 @@ import Cocoa
 			if let override = _margin { return override }
 			return Float(12.0)
 		}
-		@objc public var margin: Float {
+		public var margin: Float {
 			get { return self.marginProperty() }
 			set { _margin = newValue }
 		}
@@ -90,7 +90,7 @@ import Cocoa
 			if let override = _font { return override }
 			return Typography.smallProperty()
 		}
-		@objc public var font: NSFont {
+		public var font: NSFont {
 			get { return self.fontProperty() }
 			set { _font = newValue }
 		}
@@ -101,14 +101,14 @@ import Cocoa
 			if let override = _opaque { return override }
 			return true
 		}
-		@objc public var opaque: Bool {
+		public var opaque: Bool {
 			get { return self.opaqueProperty() }
 			set { _opaque = newValue }
 		}
 	}
 //MARK: - Color
-	@objc public static let Color = ColorAppearanceProxy()
-	@objc public class ColorAppearanceProxy: NSObject {
+	public static let Color = ColorAppearanceProxy()
+	public class ColorAppearanceProxy {
 
 		//MARK: blue 
 		private var _blue: NSColor?
@@ -116,7 +116,7 @@ import Cocoa
 			if let override = _blue { return override }
 			return NSColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
 		}
-		@objc public var blue: NSColor {
+		public var blue: NSColor {
 			get { return self.blueProperty() }
 			set { _blue = newValue }
 		}
@@ -131,7 +131,7 @@ import Cocoa
 			
 			return NSColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
 		}
-		@objc public var red: NSColor {
+		public var red: NSColor {
 			get { return self.redProperty() }
 			set { _red = newValue }
 		}
