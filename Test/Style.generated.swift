@@ -35,17 +35,6 @@ import Cocoa
 	@objc public static let FooView = FooViewAppearanceProxy()
 	@objc public class FooViewAppearanceProxy: NSObject {
 
-		//MARK: opaque 
-		private var _opaque: Bool?
-		private func opaqueProperty() -> Bool {
-			if let override = _opaque { return override }
-			return true
-		}
-		@objc public var opaque: Bool {
-			get { return self.opaqueProperty() }
-			set { _opaque = newValue }
-		}
-
 		//MARK: margin 
 		private var _margin: Float?
 		private func marginProperty() -> Float {
@@ -66,6 +55,28 @@ import Cocoa
 		@objc public var font: NSFont {
 			get { return self.fontProperty() }
 			set { _font = newValue }
+		}
+
+		//MARK: opaque 
+		private var _opaque: Bool?
+		private func opaqueProperty() -> Bool {
+			if let override = _opaque { return override }
+			return true
+		}
+		@objc public var opaque: Bool {
+			get { return self.opaqueProperty() }
+			set { _opaque = newValue }
+		}
+
+		//MARK: textAlignment 
+		private var _textAlignment: NSTextAlignment?
+		private func textAlignmentProperty() -> NSTextAlignment {
+			if let override = _textAlignment { return override }
+			return NSTextAlignment.Center
+		}
+		@objc public var textAlignment: NSTextAlignment {
+			get { return self.textAlignmentProperty() }
+			set { _textAlignment = newValue }
 		}
 	}
 //MARK: - Color

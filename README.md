@@ -29,6 +29,7 @@ FooView:
   background: $Color.red #properties can also redirect to other style's properties
   font: $Typography.small
   defaultMargin: 10
+  textAlignment: Enum(NSTextAlignment.Center)
 
 ```
 <sup>Check out Style.yaml in the Demo project to see more examples of property definitions. Many more constructs such as inheritance and extensions are available.</sub>
@@ -65,6 +66,7 @@ struct S {
 		var background: UIColor { return Color.red  }
 		var font: UIFont { return Typography.small }
 		let defaultMargin: CGFloat = 10 
+		let textAlignment = NSTextAlignment.Center
 	}
     
 }
@@ -136,7 +138,7 @@ You can integrate **S** in your build phases by adding it as a build script.
 ## Stylesheet 
 
 The following is the grammar for the YAML stylesheet.
-Is supports simple values (bool, metrics, fonts, colors, images), conditional values and redirects (by simply using $ + Section.key)
+Is supports simple values (bool, metrics, fonts, colors, images and enums), conditional values and redirects (by simply using $ + Section.key)
 
 ```yaml
 
@@ -162,12 +164,13 @@ SECTION_3 < SECTION_2: #this style inherits from another one
 The value part can be formed in the following ways:
 
 ```
-	VALUE := COLOR | FONT | NUMBER | BOOL | IMAGE | REDIRECT
+	VALUE := COLOR | FONT | NUMBER | BOOL | IMAGE | ENUM | REDIRECT
 	COLOR := "#HEX" // e.g. "#aabbcc"
 	FONT := Font("FONT_NAME", NUMBER) // e.g. Font("Arial", 12) (use System or SystemBold to use the system font)
 	IMAGE := Image("IMAGE_NAME") // e.g. Image("cursor")
 	NUMBER := (0-9)+ //e.g. 42, a number
 	BOOL := true|false
+	ENUM := Enum(Type.Value)
 	REDIRECT := $SECTION.KEY //e.g. $Typography.small
 ```
 

@@ -39,6 +39,9 @@ import Foundation
     ///A map between cocndition and
     case Hash(hash: [Condition: RhsValue])
     
+    ///An enum
+    case Enum(type: String, name: String)
+    
     private var isHash: Bool {
         switch self {
         case .Hash: return true
@@ -96,20 +99,27 @@ import Foundation
      static func valueFrom(string: String) throws  -> RhsValue  {
         
         if let components = argumentsFromString("font", string: string) {
-            assert(components.count == 2)
+            assert(components.count == 2, "Not a valid font. Format: Font(\"FontName\", size)")
             return .Font(font: Rhs.Font(name: components[0], size:Float(parseNumber(components[1]))))
             
         } else if let components = argumentsFromString("color", string: string) {
-            assert(components.count == 1)
+            assert(components.count == 1, "Not a valid color. Format: \"#rrggbb\" or \"#rrggbbaa\"")
             return .Color(color: Rhs.Color(rgba: "#\(components[0])"))
                         
         } else if let components = argumentsFromString("image", string: string) {
-            assert(components.count == 1)
+            assert(components.count == 1, "Not a valid redirect. Format: Image(\"ImageName\")")
             return .Image(image: components[0])
                 
         } else if let components = argumentsFromString("redirect", string: string) {
-            assert(components.count == 1)
+            let error = "Not a valid redirect. Format $Style.Property"
+            assert(components.count == 1, error)
             return .Redirect(redirection: RhsRedirectValue(redirection: components[0], type: "Any"))
+        
+        } else if let components = argumentsFromString("enum", string: string) {
+            assert(components.count == 1, "Not a valid enum. Format: enum(Type.Value)")
+            let enumComponents = components.first!.componentsSeparatedByString(".")
+            assert(enumComponents.count == 2, "An enum should be expressed in the form Type.Value")
+            return .Enum(type: enumComponents[0], name: enumComponents[1])
         }
         
         throw RhsError.MalformedRhsValue(error: "Unable to parse rhs value")
@@ -125,6 +135,7 @@ import Foundation
         case .Font(_): return Configuration.targetOsx ? "NSFont" : "UIFont"
         case .Color(_): return Configuration.targetOsx ? "NSColor" : "UIColor"
         case .Image(_): return Configuration.targetOsx ? "NSImage" : "UIImage"
+        case .Enum(let type, _): return type
         case .Redirect(let r): return r.type
         case .Hash(let hash): for (_, rhs) in hash { return rhs.returnValue() }
         }
@@ -166,9 +177,12 @@ extension RhsValue: Generatable {
             
         case .Image(let image):
             return generateImage(prefix, image: image)
-
+            
         case .Redirect(let redirection):
             return generateRedirection(prefix, redirection: redirection)
+            
+        case .Enum(let type, let name):
+            return generateEnum(prefix, type: type, name: name)
             
         case .Hash(let hash):
             var string = ""
@@ -225,6 +239,11 @@ extension RhsValue: Generatable {
             return "\(prefix)\(redirection.redirection)Property(traitCollection)"
         }
     }
+    
+    func generateEnum(prefix: String, type: String, name: String) -> String {
+        return "\(prefix)\(type).\(name)"
+    }
+
     
 }
 

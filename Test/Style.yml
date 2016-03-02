@@ -18,3 +18,4 @@ Extension.FooView:
   margin: 12
   opaque: true
   font: $Typography.small
+  textAlignment: Enum(NSTextAlignment.Center)
