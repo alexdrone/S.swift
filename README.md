@@ -41,19 +41,19 @@ is transformed into a strongly typed, stylesheet in swift (**for brevity's sake 
 ///Entry point for the app stylesheet
 struct S {
 
-    public static struct let Color: S.S.ColorAppearanceProxy
+    public static struct let Color: ColorAppearanceProxy
     public struct ColorAppearanceProxy {
         public var blue: UIColor { get set }
         public func redProperty(traitCollection: UITraitCollection? = default) -> UIColor
         public var red: UIColor { get set }
     }
     
-    public static struct let Typography: S.S.TypographyAppearanceProxy
+    public static struct let Typography: TypographyAppearanceProxy
     public struct TypographyAppearanceProxy {
         public var small: UIFont { get set }
     }
 
-    public static struct let FooView: S.S.FooViewAppearanceProxy
+    public static struct let FooView: FooViewAppearanceProxy
     public struct FooViewAppearanceProxy {
         public var margin: Float { get set }
         public var font: UIFont { get set }
