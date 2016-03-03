@@ -38,26 +38,26 @@ FooView:
 ```
 <sup>Check out Style.yaml in the Demo project to see more examples of property definitions. Many more constructs such as inheritance and extensions are available.</sub>
 
-is transformed into a strongly typed, stylesheet in swift
+is transformed into a strongly typed, stylesheet in swift (**for brevity's sake only the interface of the generated code is shown below**)
 
 ```swift 
 
 ///Entry point for the app stylesheet
 struct S {
 
-    public static struct let Color: S.S.ColorAppearanceProxy
+    public static struct let Color: ColorAppearanceProxy
     public struct ColorAppearanceProxy {
         public var blue: UIColor { get set }
         public func redProperty(traitCollection: UITraitCollection? = default) -> UIColor
         public var red: UIColor { get set }
     }
     
-    public static struct let Typography: S.S.TypographyAppearanceProxy
+    public static struct let Typography: TypographyAppearanceProxy
     public struct TypographyAppearanceProxy {
         public var small: UIFont { get set }
     }
 
-    public static struct let FooView: S.S.FooViewAppearanceProxy
+    public static struct let FooView: FooViewAppearanceProxy
     public struct FooViewAppearanceProxy {
         public var margin: Float { get set }
         public var font: UIFont { get set }
