@@ -6,8 +6,8 @@ Color:
   blue: "#aabbcc20"
 
 Typography:
-  small: Font("System", 12)
-  medium: Font("System", 18)
+  small: font(System, 12)
+  medium: font(System, 18)
 
 Extension.DefaultButton < FooView:
   margin: 12
@@ -18,4 +18,8 @@ Extension.FooView:
   margin: 12
   opaque: true
   font: $Typography.small
-  textAlignment: Enum(NSTextAlignment.Center)
+  textAlignment: enum(NSTextAlignment.Center)
+  image: image("myImage")
+  aPoint: point(10,10)
+  aSize: size(100,100)
+  aRect: rect(10,10,100,100)

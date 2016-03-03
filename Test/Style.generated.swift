@@ -35,17 +35,6 @@ public class S {
 	public static let FooView = FooViewAppearanceProxy()
 	public class FooViewAppearanceProxy {
 
-		//MARK: margin 
-		private var _margin: Float?
-		private func marginProperty() -> Float {
-			if let override = _margin { return override }
-			return Float(12.0)
-		}
-		public var margin: Float {
-			get { return self.marginProperty() }
-			set { _margin = newValue }
-		}
-
 		//MARK: font 
 		private var _font: NSFont?
 		private func fontProperty() -> NSFont {
@@ -55,6 +44,50 @@ public class S {
 		public var font: NSFont {
 			get { return self.fontProperty() }
 			set { _font = newValue }
+		}
+
+		//MARK: aRect 
+		private var _aRect: CGRect?
+		private func aRectProperty() -> CGRect {
+			if let override = _aRect { return override }
+			return CGRect(x: 10.0, y: 10.0, width: 100.0, height: 100.0)
+		}
+		public var aRect: CGRect {
+			get { return self.aRectProperty() }
+			set { _aRect = newValue }
+		}
+
+		//MARK: aPoint 
+		private var _aPoint: CGPoint?
+		private func aPointProperty() -> CGPoint {
+			if let override = _aPoint { return override }
+			return CGPoint(x: 10.0, y: 10.0)
+		}
+		public var aPoint: CGPoint {
+			get { return self.aPointProperty() }
+			set { _aPoint = newValue }
+		}
+
+		//MARK: image 
+		private var _image: NSImage?
+		private func imageProperty() -> NSImage {
+			if let override = _image { return override }
+			return NSImage(named: ""myimage"")
+		}
+		public var image: NSImage {
+			get { return self.imageProperty() }
+			set { _image = newValue }
+		}
+
+		//MARK: margin 
+		private var _margin: CGFloat?
+		private func marginProperty() -> CGFloat {
+			if let override = _margin { return override }
+			return Float(12.0)
+		}
+		public var margin: CGFloat {
+			get { return self.marginProperty() }
+			set { _margin = newValue }
 		}
 
 		//MARK: opaque 
@@ -77,6 +110,17 @@ public class S {
 		public var textAlignment: NSTextAlignment {
 			get { return self.textAlignmentProperty() }
 			set { _textAlignment = newValue }
+		}
+
+		//MARK: aSize 
+		private var _aSize: CGSize?
+		private func aSizeProperty() -> CGSize {
+			if let override = _aSize { return override }
+			return CGSize(width: 100.0, height: 100.0)
+		}
+		public var aSize: CGSize {
+			get { return self.aSizeProperty() }
+			set { _aSize = newValue }
 		}
 	}
 //MARK: - Color
@@ -123,7 +167,7 @@ public class S {
 		}
 
 		//MARK: margin 
-		override private func marginProperty() -> Float {
+		override private func marginProperty() -> CGFloat {
 			if let override = _margin { return override }
 			return Float(12.0)
 		}

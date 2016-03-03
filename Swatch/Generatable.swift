@@ -21,6 +21,15 @@ import Foundation
     ///A scalar float value
     case Scalar(float: Float)
     
+    ///A CGPoint
+    case Point(x: Float, y: Float)
+    
+    ///A CGPoint
+    case Size(width: Float, height: Float)
+    
+    ///A CGRect value
+    case Rect(x: Float, y: Float, width: Float, height: Float)
+    
     ///A boolean value
     case Boolean(bool: Bool)
     
@@ -114,7 +123,27 @@ import Foundation
             let error = "Not a valid redirect. Format $Style.Property"
             assert(components.count == 1, error)
             return .Redirect(redirection: RhsRedirectValue(redirection: components[0], type: "Any"))
-        
+            
+        } else if let components = argumentsFromString("point", string: string) {
+            assert(components.count == 2, "Not a valid point. Format: Point(x, y)")
+            let x = parseNumber(components[0])
+            let y = parseNumber(components[1])
+            return .Point(x: x, y: y)
+            
+        } else if let components = argumentsFromString("size", string: string) {
+            assert(components.count == 2, "Not a valid size. Format: Size(width, height)")
+            let w = parseNumber(components[0])
+            let h = parseNumber(components[1])
+            return .Size(width: w, height: h)
+            
+        } else if let components = argumentsFromString("rect", string: string) {
+            assert(components.count == 4, "Not a valid rect. Format: Rect(x, y, width, height)")
+            let x = parseNumber(components[0])
+            let y = parseNumber(components[1])
+            let w = parseNumber(components[2])
+            let h = parseNumber(components[3])
+            return .Rect(x: x, y: y, width: w, height: h)
+            
         } else if let components = argumentsFromString("enum", string: string) {
             assert(components.count == 1, "Not a valid enum. Format: enum(Type.Value)")
             let enumComponents = components.first!.componentsSeparatedByString(".")
@@ -130,13 +159,16 @@ import Foundation
      func returnValue() -> String {
 
         switch self {
-        case .Scalar(_): return "Float"
+        case .Scalar(_): return "CGFloat"
         case .Boolean(_): return "Bool"
         case .Font(_): return Configuration.targetOsx ? "NSFont" : "UIFont"
         case .Color(_): return Configuration.targetOsx ? "NSColor" : "UIColor"
         case .Image(_): return Configuration.targetOsx ? "NSImage" : "UIImage"
         case .Enum(let type, _): return type
         case .Redirect(let r): return r.type
+        case .Point(_, _): return "CGPoint"
+        case .Size(_, _): return "CGSize"
+        case .Rect(_, _, _, _): return "CGRect"
         case .Hash(let hash): for (_, rhs) in hash { return rhs.returnValue() }
         }
         return "AnyObject"
@@ -183,6 +215,15 @@ extension RhsValue: Generatable {
             
         case .Enum(let type, let name):
             return generateEnum(prefix, type: type, name: name)
+            
+        case .Point(let x, let y):
+            return generatePoint(prefix, x: x, y: y)
+            
+        case .Size(let w, let h):
+            return generateSize(prefix, width: w, height: h)
+            
+        case .Rect(let x, let y, let w, let h):
+            return generateRect(prefix, x: x, y: y, width: w, height: h)
             
         case .Hash(let hash):
             var string = ""
@@ -243,7 +284,18 @@ extension RhsValue: Generatable {
     func generateEnum(prefix: String, type: String, name: String) -> String {
         return "\(prefix)\(type).\(name)"
     }
+    
+    func generatePoint(prefix: String, x: Float, y: Float) -> String {
+        return "\(prefix)CGPoint(x: \(x), y: \(y))"
+    }
+    
+    func generateSize(prefix: String, width: Float, height: Float) -> String {
+        return "\(prefix)CGSize(width: \(width), height: \(height))"
+    }
 
+    func generateRect(prefix: String, x: Float, y: Float, width: Float, height: Float) -> String {
+        return "\(prefix)CGRect(x: \(x), y: \(y), width: \(width), height: \(height))"
+    }
     
 }
 

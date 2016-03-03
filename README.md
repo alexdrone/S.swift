@@ -30,6 +30,10 @@ FooView:
   font: $Typography.small
   defaultMargin: 10
   textAlignment: Enum(NSTextAlignment.Center)
+  image: Image("myImage")
+  aPoint: Point(10,10)
+  aSize: Size(100,100)
+  aRect: Rect(10,10,100,100)
 
 ```
 <sup>Check out Style.yaml in the Demo project to see more examples of property definitions. Many more constructs such as inheritance and extensions are available.</sub>
@@ -59,6 +63,10 @@ struct S {
         public var font: UIFont { get set }
         public var opaque: Bool { get set }
         public var textAlignment: NSTextAlignment { get set }
+        public var image: NSImage { get set }
+        public var aPoint: CGPoint { get set }
+        public var aSize: CGSize { get set }
+        public var aRect: CGRect { get set }
     }
 }
 
@@ -156,13 +164,16 @@ SECTION_3 < SECTION_2: #this style inherits from another one
 The value part can be formed in the following ways:
 
 ```
-	VALUE := COLOR | FONT | NUMBER | BOOL | IMAGE | ENUM | REDIRECT
+	VALUE := COLOR | FONT | NUMBER | BOOL | IMAGE | ENUM | POINT | SIZE | RECT | REDIRECT
 	COLOR := "#HEX" // e.g. "#aabbcc"
 	FONT := Font("FONT_NAME", NUMBER) // e.g. Font("Arial", 12) (use System or SystemBold to use the system font)
 	IMAGE := Image("IMAGE_NAME") // e.g. Image("cursor")
 	NUMBER := (0-9)+ //e.g. 42, a number
 	BOOL := true|false
 	ENUM := Enum(Type.Value)
+	POINT := Point(NUMBER, NUMBER)
+	SIZE := Size(NUMBER, NUMBER)
+	RECT := Rect(NUMBER, NUMBER, NUMBER, NUMBER)
 	REDIRECT := $SECTION.KEY //e.g. $Typography.small
 ```
 

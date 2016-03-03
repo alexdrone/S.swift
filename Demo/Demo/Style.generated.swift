@@ -16,7 +16,7 @@ public class S {
 		}
 
 		//MARK: margin 
-		override private func marginProperty() -> Float {
+		override private func marginProperty() -> CGFloat {
 			if let override = _margin { return override }
 			return Float(12.0)
 		}
@@ -74,12 +74,12 @@ public class S {
 		}
 
 		//MARK: margin 
-		private var _margin: Float?
-		private func marginProperty() -> Float {
+		private var _margin: CGFloat?
+		private func marginProperty() -> CGFloat {
 			if let override = _margin { return override }
 			return Float(12.0)
 		}
-		public var margin: Float {
+		public var margin: CGFloat {
 			get { return self.marginProperty() }
 			set { _margin = newValue }
 		}
