@@ -64,6 +64,11 @@ func destination(file: String) -> String {
 func generate(file: String) {
 
     let url = NSURL(fileURLWithPath: file)
+    
+    if url.absoluteString.containsString(".swiftlint.yml") {
+        return
+    }
+    
     let generator = try! Generator(url: url)
     let payload = generator.generate()
     let dest = destination(file)
