@@ -243,7 +243,7 @@ extension RhsValue: Generatable {
     }
     
     func generateScalar(prefix: String, float: Float) -> String {
-        return "\(prefix)Float(\(float))"
+        return "\(prefix)CGFloat(\(float))"
     }
     
     func generateBool(prefix: String, boolean: Bool) -> String {

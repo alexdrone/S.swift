@@ -248,8 +248,8 @@ extension Condition: Generatable {
             switch expression.expression.0 {
             case .Height: string += "\(size).height "
             case .Width: string += "\(size).width "
-            case .Horizontal: string += "traitCollection.horizontalSizeClass "
-            case .Vertical: string += "traitCollection.verticalSizeClass "
+            case .Horizontal: string += "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.Unspecified)"
+            case .Vertical: string += "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.Unspecified)"
             case .Idiom: string += "UIDevice.currentDevice().userInterfaceIdiom "
             case .Unspecified: string += "true "
             }
