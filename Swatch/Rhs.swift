@@ -133,6 +133,25 @@ struct Rhs {
             return self.fontName.containsString("SystemBold")
         }
         
+        var hasWeight: Bool {
+            return self.isSystemFont && self.fontName.containsString("-")
+        }
+        
+        var weight: String? {
+            if !self.hasWeight {
+                return nil
+            }
+            
+            let components = self.fontName.componentsSeparatedByString("-")
+            assert(components.count == 2, "Illegal system font weight \(self.fontName)")
+            let weights = ["UltraLight", "Thin", "Light", "Regular", "Medium", "Semibold", "Bold", "Heavy", "Black"]
+            let weight = components[1]
+            assert(weights.contains(weight), "\(weight) is not a valid system font weight. Allowed weights: \(weights)")
+            
+            let prefix = Configuration.targetOsx ? "NS" : "UI"
+            return "\(prefix)FontWeight\(weight)"
+        }
+        
         init(name fontName: String, size fontSize: Float) {
             self.fontName = fontName
             self.fontSize = fontSize

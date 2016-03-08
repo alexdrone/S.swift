@@ -1,5 +1,4 @@
-<p align="center">
-![GitHub Logo](Doc/logo.png)
+#S
 
 [![Bin](https://img.shields.io/badge/binary-download-green.svg?style=flat)](https://raw.githubusercontent.com/alexdrone/S/master/sgen)
 [![Platform](https://img.shields.io/badge/platform-ios | osx | watchos | tvos -lightgrey.svg?style=flat)](#)
@@ -23,14 +22,15 @@ Color:
     "default": "#ff0000"
 
 Typography:
-  small: Font("Helvetica", 12) #font (use System or SystemBold as font names to use the system font)
+  small: Font(Helvetica, 12) #font (use System(-Weight*) or SystemBold as font names to use the system font)
+  medium: Font(System-Semibold, 14)
   
 FooView:
   background: $Color.red #properties can also redirect to other style's properties
   font: $Typography.small
   defaultMargin: 10
   textAlignment: Enum(NSTextAlignment.Center)
-  image: Image("myImage")
+  image: Image(myImage)
   aPoint: Point(10,10)
   aSize: Size(100,100)
   aRect: Rect(10,10,100,100)
@@ -166,8 +166,9 @@ The value part can be formed in the following ways:
 ```
 	VALUE := COLOR | FONT | NUMBER | BOOL | IMAGE | ENUM | POINT | SIZE | RECT | REDIRECT
 	COLOR := "#HEX" // e.g. "#aabbcc"
-	FONT := Font("FONT_NAME", NUMBER) // e.g. Font("Arial", 12) (use System or SystemBold to use the system font)
-	IMAGE := Image("IMAGE_NAME") // e.g. Image("cursor")
+	FONT := Font(FONT_NAME(-WEIGHT)?, NUMBER) // e.g. Font(Arial, 12) or Font(System-Black, 14)
+	WEIGHT := UltraLight | Thin | Light | Regular | Medium | Semibold | Bold | Heavy | Black
+	IMAGE := Image(IMAGE_NAME) // e.g. Image(cursor)
 	NUMBER := (0-9)+ //e.g. 42, a number
 	BOOL := true|false
 	ENUM := Enum(Type.Value)

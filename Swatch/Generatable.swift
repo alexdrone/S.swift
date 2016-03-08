@@ -117,7 +117,7 @@ import Foundation
                         
         } else if let components = argumentsFromString("image", string: string) {
             assert(components.count == 1, "Not a valid redirect. Format: Image(\"ImageName\")")
-            return .Image(image: components[0])
+            return .Image(image: components[0].stringByReplacingOccurrencesOfString("\"", withString: ""))
                 
         } else if let components = argumentsFromString("redirect", string: string) {
             let error = "Not a valid redirect. Format $Style.Property"
@@ -256,7 +256,8 @@ extension RhsValue: Generatable {
         //system font
         if font.isSystemBoldFont || font.isSystemFont {
             let function = font.isSystemFont ? "systemFontOfSize" : "boldSystemFontOfSize"
-            return "\(prefix)\(fontClass).\(function)(\(font.fontSize))"
+            let weight = font.hasWeight ? ", weight: \(font.weight!)" : ""
+            return "\(prefix)\(fontClass).\(function)(\(font.fontSize)\(weight))"
         }
         
         //font with name
@@ -270,7 +271,7 @@ extension RhsValue: Generatable {
     
     func generateImage(prefix: String, image: String) -> String {
         let colorClass = Configuration.targetOsx ? "NSImage" : "UImage"
-        return "\(prefix)\(colorClass)(named: \"\(image)\")"
+        return "\(prefix)\(colorClass)(named: \"\(image)\")!"
     }
     
     func generateRedirection(prefix: String, redirection: RhsRedirectValue) -> String {
@@ -490,7 +491,7 @@ extension Stylesheet: Generatable {
         header += "private var __ApperanceProxyHandle: UInt8 = 0\n\n"
         header += "///Your view should conform to 'AppearaceProxyComponent' in order to expose an appearance proxy\n"
         header += "public protocol AppearaceProxyComponent: class {\n"
-        header += "\tassociatedType ApperanceProxyType\n"
+        header += "\ttypealias ApperanceProxyType\n"
         header += "\tvar appearanceProxy: ApperanceProxyType { get }\n"
         header += "\tfunc didChangeAppearanceProxy()"
         header += "\n}\n\n"

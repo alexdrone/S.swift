@@ -24,7 +24,7 @@ public class S {
 		private var _medium: NSFont?
 		private func mediumProperty() -> NSFont {
 			if let override = _medium { return override }
-			return NSFont.systemFontOfSize(18.0)
+			return NSFont.systemFontOfSize(18.0, weight: NSFontWeightSemibold)
 		}
 		public var medium: NSFont {
 			get { return self.mediumProperty() }
@@ -72,7 +72,7 @@ public class S {
 		private var _image: NSImage?
 		private func imageProperty() -> NSImage {
 			if let override = _image { return override }
-			return NSImage(named: ""myimage"")
+			return NSImage(named: "myimage")!
 		}
 		public var image: NSImage {
 			get { return self.imageProperty() }
