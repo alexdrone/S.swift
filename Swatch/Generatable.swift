@@ -117,7 +117,7 @@ import Foundation
                         
         } else if let components = argumentsFromString("image", string: string) {
             assert(components.count == 1, "Not a valid redirect. Format: Image(\"ImageName\")")
-            return .Image(image: components[0].stringByReplacingOccurrencesOfString("\"", withString: ""))
+            return .Image(image: components[0])
                 
         } else if let components = argumentsFromString("redirect", string: string) {
             let error = "Not a valid redirect. Format $Style.Property"
@@ -261,7 +261,7 @@ extension RhsValue: Generatable {
         }
         
         //font with name
-        return "\(prefix)\(fontClass)(name: \(font.fontName), size: \(font.fontSize))!"
+        return "\(prefix)\(fontClass)(name: \"\(font.fontName)\", size: \(font.fontSize))!"
     }
     
     func generateColor(prefix: String, color: Rhs.Color) -> String {
