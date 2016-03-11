@@ -47,6 +47,11 @@ public struct Generator: Generatable  {
         
         //all of the styles
         var styles = [Style]()
+        
+        switch yaml {
+        case .Error(let error): fatalError(error)
+        default: break
+        }
 
         switch yaml.value! {
         case .Dictionary(let main):
