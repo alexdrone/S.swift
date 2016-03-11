@@ -30,6 +30,9 @@ import Foundation
     ///A CGRect value
     case Rect(x: Float, y: Float, width: Float, height: Float)
     
+    ///UIEdgeInsets value
+    case EdgeInset(top: Float, left: Float, bottom: Float, right: Float)
+
     ///A boolean value
     case Boolean(bool: Bool)
     
@@ -144,6 +147,14 @@ import Foundation
             let h = parseNumber(components[3])
             return .Rect(x: x, y: y, width: w, height: h)
             
+        } else if let components = argumentsFromString("edgeInsets", string: string) {
+            assert(components.count == 4, "Not a valid edge inset. Format: EdgeInset(top, left, bottom, right)")
+            let top = parseNumber(components[0])
+            let left = parseNumber(components[1])
+            let bottom = parseNumber(components[2])
+            let right = parseNumber(components[3])
+            return .EdgeInset(top: top, left: left, bottom: bottom, right: right)
+            
         } else if let components = argumentsFromString("enum", string: string) {
             assert(components.count == 1, "Not a valid enum. Format: enum(Type.Value)")
             let enumComponents = components.first!.componentsSeparatedByString(".")
@@ -169,6 +180,7 @@ import Foundation
         case .Point(_, _): return "CGPoint"
         case .Size(_, _): return "CGSize"
         case .Rect(_, _, _, _): return "CGRect"
+        case .EdgeInset(_, _, _, _): return  Configuration.targetOsx ? "NSEdgeInsets" : "UIEdgeInsets"
         case .Hash(let hash): for (_, rhs) in hash { return rhs.returnValue() }
         }
         return "AnyObject"
@@ -224,6 +236,9 @@ extension RhsValue: Generatable {
             
         case .Rect(let x, let y, let w, let h):
             return generateRect(prefix, x: x, y: y, width: w, height: h)
+            
+        case .EdgeInset(let top, let left, let bottom, let right):
+            return generateEdgeInset(prefix, top: top, left: left, bottom: bottom, right: right)
             
         case .Hash(let hash):
             var string = ""
@@ -296,6 +311,10 @@ extension RhsValue: Generatable {
 
     func generateRect(prefix: String, x: Float, y: Float, width: Float, height: Float) -> String {
         return "\(prefix)CGRect(x: \(x), y: \(y), width: \(width), height: \(height))"
+    }
+    
+    func generateEdgeInset(prefix: String, top: Float, left: Float, bottom: Float, right: Float) -> String {
+        return "\(prefix)\(Configuration.targetOsx ? "NS" : "UI")EdgeInsets(top: \(top), left: \(left), bottom: \(bottom), right: \(right))"
     }
     
 }
