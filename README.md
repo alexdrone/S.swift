@@ -34,6 +34,7 @@ FooView:
   aPoint: Point(10,10)
   aSize: Size(100,100)
   aRect: Rect(10,10,100,100)
+  aEdgeInsets: EdgeInsets(10,10,100,100)
 
 ```
 <sup>Check out Style.yaml in the Demo project to see more examples of property definitions. Many more constructs such as inheritance and extensions are available.</sub>
@@ -67,6 +68,7 @@ struct S {
         public var aPoint: CGPoint { get set }
         public var aSize: CGSize { get set }
         public var aRect: CGRect { get set }
+        public var aEdgeInsets: UIEdgeInsets { get set }
     }
 }
 
@@ -164,7 +166,7 @@ SECTION_3 < SECTION_2: #this style inherits from another one
 The value part can be formed in the following ways:
 
 ```
-	VALUE := COLOR | FONT | NUMBER | BOOL | IMAGE | ENUM | POINT | SIZE | RECT | REDIRECT
+	VALUE := COLOR | FONT | NUMBER | BOOL | IMAGE | ENUM | POINT | SIZE | RECT | EDGE_INSETS | REDIRECT
 	COLOR := "#HEX" // e.g. "#aabbcc"
 	FONT := Font(FONT_NAME(-WEIGHT)?, NUMBER) // e.g. Font(Arial, 12) or Font(System-Black, 14)
 	WEIGHT := UltraLight | Thin | Light | Regular | Medium | Semibold | Bold | Heavy | Black
@@ -175,6 +177,7 @@ The value part can be formed in the following ways:
 	POINT := Point(NUMBER, NUMBER)
 	SIZE := Size(NUMBER, NUMBER)
 	RECT := Rect(NUMBER, NUMBER, NUMBER, NUMBER)
+	EDGE_INSETS := EdgeInsets(NUMBER, NUMBER, NUMBER, NUMBER)
 	REDIRECT := $SECTION.KEY //e.g. $Typography.small
 ```
 
