@@ -155,6 +155,14 @@ import Foundation
             let right = parseNumber(components[3])
             return .EdgeInset(top: top, left: left, bottom: bottom, right: right)
             
+        } else if let components = argumentsFromString("Insets", string: string) {
+            assert(components.count == 4, "Not a valid edge inset. Format: EdgeInset(top, left, bottom, right)")
+            let top = parseNumber(components[0])
+            let left = parseNumber(components[1])
+            let bottom = parseNumber(components[2])
+            let right = parseNumber(components[3])
+            return .EdgeInset(top: top, left: left, bottom: bottom, right: right)
+            
         } else if let components = argumentsFromString("enum", string: string) {
             assert(components.count == 1, "Not a valid enum. Format: enum(Type.Value)")
             let enumComponents = components.first!.componentsSeparatedByString(".")
