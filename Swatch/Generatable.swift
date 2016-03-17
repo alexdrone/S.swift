@@ -403,7 +403,6 @@ extension Style: Generatable {
         var superclass = Configuration.objcGeneration ? ": NSObject" : ""
         if let s = self.superclassName { superclass = ": \(s)AppearanceProxy" }
         wrapper += "\n\t\(objc)public static let \(self.name) = \(self.name)AppearanceProxy()"
-        wrapper += "\n\t\(objc)public static let Get\(self.name): (Void) -> (\(self.name)AppearanceProxy) = { return S.\(self.name) }"
         wrapper += "\n\t\(objc)public class \(self.name)AppearanceProxy\(superclass) {"
         for property in self.properties {
             wrapper += property.generate()
