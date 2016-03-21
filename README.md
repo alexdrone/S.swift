@@ -34,7 +34,7 @@ FooView:
   aPoint: Point(10,10)
   aSize: Size(100,100)
   aRect: Rect(10,10,100,100)
-  aEdgeInsets: EdgeInsets(10,10,100,100)
+  aEdgeInsets: Insets(10,10,100,100)
 
 ```
 <sup>Check out Style.yaml in the Demo project to see more examples of property definitions. Many more constructs such as inheritance and extensions are available.</sub>
@@ -177,7 +177,7 @@ The value part can be formed in the following ways:
 	POINT := Point(NUMBER, NUMBER)
 	SIZE := Size(NUMBER, NUMBER)
 	RECT := Rect(NUMBER, NUMBER, NUMBER, NUMBER)
-	EDGE_INSETS := EdgeInsets(NUMBER, NUMBER, NUMBER, NUMBER)
+	EDGE_INSETS := Insets(NUMBER, NUMBER, NUMBER, NUMBER)
 	REDIRECT := $SECTION.KEY //e.g. $Typography.small
 ```
 
