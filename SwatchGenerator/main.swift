@@ -65,7 +65,7 @@ func generate(file: String) {
 
     let url = NSURL(fileURLWithPath: file)
     
-    if url.absoluteString.containsString(".swiftlint.yml") {
+    if url.absoluteString.containsString(".swiftlint.yml") || url.absoluteString.hasPrefix(".") {
         return
     }
     
