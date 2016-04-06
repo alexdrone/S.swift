@@ -518,7 +518,7 @@ extension Stylesheet: Generatable {
         header += "private var __ApperanceProxyHandle: UInt8 = 0\n\n"
         header += "///Your view should conform to 'AppearaceProxyComponent' in order to expose an appearance proxy\n"
         header += "public protocol AppearaceProxyComponent: class {\n"
-        header += "\ttypealias ApperanceProxyType\n"
+        header += "\tassociatedtype ApperanceProxyType\n"
         header += "\tvar appearanceProxy: ApperanceProxyType { get }\n"
         header += "\tfunc didChangeAppearanceProxy()"
         header += "\n}\n\n"
