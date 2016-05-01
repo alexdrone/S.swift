@@ -8,6 +8,73 @@
 
 import Foundation
 
+
+extension Condition: Generatable {
+    
+    ///Generates the code for this right hand side value
+    func generate() -> String {
+        
+        var expressions = [String]()
+        for expression in self.expressions {
+            
+            let size = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?.frame.size" : "UIScreen.mainScreen().bounds.size"
+            
+            if Configuration.targetOsx {
+                switch expression.expression.0 {
+                case .Height: break
+                case .Width: break
+                case .Horizontal: continue
+                case .Vertical: continue
+                case .Idiom: continue
+                case .Unspecified: continue
+                default: continue
+                }
+            }
+            
+            var string = ""
+            switch expression.expression.0 {
+            case .Height: string += "\(size).height "
+            case .Width: string += "\(size).width "
+            case .Horizontal: string += "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) "
+            case .Vertical: string += "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) "
+            case .Idiom: string += "UIDevice.currentDevice().userInterfaceIdiom "
+            case .ContentSize: string += "UIApplication.sharedApplication().preferredContentSizeCategory "
+            case .Unspecified: string += "true "
+            }
+            
+            switch expression.expression.1 {
+            case .Equal: string += "== "
+            case .NotEqual: string += "!= "
+            case .GreaterThan: string += "> "
+            case .GreaterThanOrEqual: string += ">= "
+            case .LessThan: string += "< "
+            case .LessThanOrEqual: string += "<= "
+            case .Unspecified: string += ""
+            }
+            
+            switch expression.expression.2 {
+            case .Constant: string += "\(expression.expression.3) "
+            case .Compact: string += "UIUserInterfaceSizeClass.Compact "
+            case .Regular: string += "UIUserInterfaceSizeClass.Regular "
+            case .Pad: string += "UIUserInterfaceIdiom.Pad "
+            case .Phone: string += "UIUserInterfaceIdiom.Phone "
+            case .ContentSizeExtraSmall: string += "UIContentSizeCategoryExtraSmall"
+            case .ContentSizeSmall: string += "UIContentSizeCategorySmall"
+            case .ContentSizeMedium: string += "UIContentSizeCategoryMedium"
+            case .ContentSizeLarge: string += "UIContentSizeCategoryLarge"
+            case .ContentSizeExtraLarge: string += "UIContentSizeCategoryExtraLarge"
+            case .ContentSizeExtraExtraLarge: string += "UIContentSizeCategoryExtraExtraLarge"
+            case .ContentSizeExtraExtraExtraLarge: string += "UIContentSizeCategoryExtraExtraExtraLarge"
+            case .Unspecified: string += ""
+            }
+            
+            expressions.append(string)
+        }
+        
+        return expressions.joinWithSeparator(" && ")
+    }
+}
+
 enum ConditionError: ErrorType {
     case MalformedCondition(error: String)
     case MalformedRhsValue(error: String)
@@ -45,6 +112,7 @@ struct Condition: Hashable, Parsable {
             case Width = "width"
             case Height = "height"
             case Idiom = "idiom"
+            case ContentSize = "contentSizeCategory"
             case Unspecified = "unspecified"
         }
 
@@ -56,7 +124,6 @@ struct Condition: Hashable, Parsable {
             case GreaterThan = ">"
             case GreaterThanOrEqual = "≥"
             case Unspecified = "unspecified"
-
 
             static func all() -> [Operator] {
                 return [Equal, NotEqual, LessThan, LessThanOrEqual, GreaterThan, GreaterThanOrEqual]
@@ -106,6 +173,13 @@ struct Condition: Hashable, Parsable {
             case Pad = "pad"
             case Phone = "phone"
             case Constant = "_"
+            case ContentSizeExtraSmall = "extraSmall"
+            case ContentSizeSmall = "small"
+            case ContentSizeMedium = "medium"
+            case ContentSizeLarge = "large"
+            case ContentSizeExtraLarge = "extraLarge"
+            case ContentSizeExtraExtraLarge = "extraExtraLarge"
+            case ContentSizeExtraExtraExtraLarge = "extraExtraExtraLarge"
             case Unspecified = "unspecified"
         }
     }
@@ -223,61 +297,3 @@ private func normalizeExpressionString(string: String, forceLowerCase: Bool = tr
     return ps
 }
 
-extension Condition: Generatable {
-
-    ///Generates the code for this right hand side value
-    func generate() -> String {
-
-        var expressions = [String]()
-        for expression in self.expressions {
-
-            let size = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?.frame.size" : "UIScreen.mainScreen().bounds.size"
-
-            if Configuration.targetOsx {
-              switch expression.expression.0 {
-              case .Height: break
-              case .Width: break
-              case .Horizontal: continue
-              case .Vertical: continue
-              case .Idiom: continue
-              case .Unspecified: continue
-              }
-            }
-
-            var string = ""
-            switch expression.expression.0 {
-            case .Height: string += "\(size).height "
-            case .Width: string += "\(size).width "
-            case .Horizontal: string += "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) "
-            case .Vertical: string += "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) "
-            case .Idiom: string += "UIDevice.currentDevice().userInterfaceIdiom "
-            case .Unspecified: string += "true "
-            }
-
-            switch expression.expression.1 {
-            case .Equal: string += "== "
-            case .NotEqual: string += "!= "
-            case .GreaterThan: string += "> "
-            case .GreaterThanOrEqual: string += ">= "
-            case .LessThan: string += "< "
-            case .LessThanOrEqual: string += "<= "
-            case .Unspecified: string += ""
-            }
-
-            switch expression.expression.2 {
-            case .Constant: string += "\(expression.expression.3) "
-            case .Compact: string += "UIUserInterfaceSizeClass.Compact "
-            case .Regular: string += "UIUserInterfaceSizeClass.Regular "
-            case .Pad: string += "UIUserInterfaceIdiom.Pad "
-            case .Phone: string += "UIUserInterfaceIdiom.Phone "
-            case .Unspecified: string += ""
-            }
-
-            expressions.append(string)
-        }
-
-        return expressions.joinWithSeparator(" && ")
-    }
-
-
-}

@@ -353,10 +353,9 @@ extension Property: Generatable {
         //options
         let objc = Configuration.objcGeneration ? "@objc " : ""
         let methodArgs =  Configuration.targetOsx ? "" : "traitCollection: UITraitCollection? = UIScreen.mainScreen().traitCollection"
-        let methodPublic = self.rhs.isHash ? "public" : "private"
         let override = self.isOverride ? "override " : ""
         
-        method += "\n\t\t\(override)\(methodPublic) func \(self.key)Property(\(methodArgs)) -> \(self.rhs.returnValue()) {"
+        method += "\n\t\t\(override)public func \(self.key)Property(\(methodArgs)) -> \(self.rhs.returnValue()) {"
         method += "\n\t\t\tif let override = _\(self.key) { return override }"
         method += "\(rhs.generate())"
         method += "\n\t\t}"
@@ -531,7 +530,7 @@ extension Stylesheet: Generatable {
         for style in self.styles.filter({ $0.isExtension }) {
             let visibility = Configuration.publicExtensions ? "public" : ""
             extensions += "\nextension \(style.name): AppearaceProxyComponent {\n\n"
-            extensions += "\t\(visibility) typealias ApperanceProxyType = S.\(style.name)AppearanceProxy\n"
+            extensions += "\t\(visibility) associatedtype ApperanceProxyType = S.\(style.name)AppearanceProxy\n"
             extensions += "\t\(visibility) var appearanceProxy: ApperanceProxyType {\n"
             extensions += "\t\tget {\n"
             extensions += "\t\t\tguard let proxy = objc_getAssociatedObject(self, &__ApperanceProxyHandle) as? ApperanceProxyType else { return S.\(style.name) }\n"
