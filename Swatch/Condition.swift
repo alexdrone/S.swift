@@ -53,11 +53,11 @@ extension Condition: Generatable {
             }
             
             switch expression.expression.2 {
-            case .Constant: string += "\(expression.expression.3) "
-            case .Compact: string += "UIUserInterfaceSizeClass.Compact "
-            case .Regular: string += "UIUserInterfaceSizeClass.Regular "
-            case .Pad: string += "UIUserInterfaceIdiom.Pad "
-            case .Phone: string += "UIUserInterfaceIdiom.Phone "
+            case .Constant: string += "\(expression.expression.3)"
+            case .Compact: string += "UIUserInterfaceSizeClass.Compact"
+            case .Regular: string += "UIUserInterfaceSizeClass.Regular"
+            case .Pad: string += "UIUserInterfaceIdiom.Pad"
+            case .Phone: string += "UIUserInterfaceIdiom.Phone"
             case .ContentSizeExtraSmall: string += "UIContentSizeCategoryExtraSmall"
             case .ContentSizeSmall: string += "UIContentSizeCategorySmall"
             case .ContentSizeMedium: string += "UIContentSizeCategoryMedium"
@@ -65,6 +65,11 @@ extension Condition: Generatable {
             case .ContentSizeExtraLarge: string += "UIContentSizeCategoryExtraLarge"
             case .ContentSizeExtraExtraLarge: string += "UIContentSizeCategoryExtraExtraLarge"
             case .ContentSizeExtraExtraExtraLarge: string += "UIContentSizeCategoryExtraExtraExtraLarge"
+            case .ContentSizeAccessibilityMedium: string += "UIContentSizeCategoryAccessibilityMedium"
+            case .ContentSizeAccessibilityLarge: string += "UIContentSizeCategoryAccessibilityLarge"
+            case .ContentSizeAccessibilityExtraLarge: string += "UIContentSizeCategoryAccessibilityExtraLarge"
+            case .ContentSizeAccessibilityExtraExtraLarge: string += "UIContentSizeCategoryAccessibilityExtraExtraLarge"
+            case .ContentSizeAccessibilityExtraExtraExtraLarge: string += "UIContentSizeCategoryAccessibilityExtraExtraExtraLarge"
             case .Unspecified: string += ""
             }
             
@@ -180,6 +185,11 @@ struct Condition: Hashable, Parsable {
             case ContentSizeExtraLarge = "extraLarge"
             case ContentSizeExtraExtraLarge = "extraExtraLarge"
             case ContentSizeExtraExtraExtraLarge = "extraExtraExtraLarge"
+            case ContentSizeAccessibilityMedium = "accessibilityMedium"
+            case ContentSizeAccessibilityLarge = "accessibilityLarge"
+            case ContentSizeAccessibilityExtraLarge = "accessibilityExtraLarge"
+            case ContentSizeAccessibilityExtraExtraLarge = "accessibilityExtraExtraLarge"
+            case ContentSizeAccessibilityExtraExtraExtraLarge = "accessibilityExtraExtraExtraLarge"
             case Unspecified = "unspecified"
         }
     }
