@@ -185,9 +185,10 @@ A condition has instead the following form
 
 ```
 	CONDITION := 'EXPR and EXPR and ...' //e.g. 'width < 200 and vertical = compact and idiom = phone'
-	EXPR := SIZE_CLASS_EXPR | SIZE_EXPR | IDIOM_EXPR 
+	EXPR := SIZE_CLASS_EXPR | SIZE_EXPR | IDIOM_EXPR | CONTENT_SIZE_CATEGORY_EXPR
 	SIZE_CLASS_EXPR := (horizontal|vertical)(=|!=)(regular|compact) // e.g. horizontal = regular
 	SIZE_EXPR := (width|height)(<|<=|=|!=|>|>=)(SIZE_PX) //e.g. width > 320
+	CONTENT_SIZE_CATEGORY_EXPR := category (=|!=) (xs|s|m|l|xl|xxl|xxxl|am|al|axl|axxl|axxxl) //e.g category = m
 	SIZE_PX := (0-9)+ //e.g. 42, a number
 	IDIOM_EXPR := (idiom)(=|!=)(pad|phone) //e.g. idiom = pad
 
