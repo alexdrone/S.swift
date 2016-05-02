@@ -117,7 +117,7 @@ struct Condition: Hashable, Parsable {
             case Width = "width"
             case Height = "height"
             case Idiom = "idiom"
-            case ContentSize = "contentSizeCategory"
+            case ContentSize = "category"
             case Unspecified = "unspecified"
         }
 
