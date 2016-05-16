@@ -551,10 +551,10 @@ extension Stylesheet: Generatable {
         for style in self.styles.filter({ $0.isExtension }) {
             let visibility = Configuration.publicExtensions ? "public" : ""
             extensions += "\nextension \(style.name): AppearaceProxyComponent {\n\n"
-            extensions += "\t\(visibility) typealias ApperanceProxyType = S.\(style.name)AppearanceProxy\n"
+            extensions += "\t\(visibility) typealias ApperanceProxyType = \(Configuration.stylesheetName).\(style.name)AppearanceProxy\n"
             extensions += "\t\(visibility) var appearanceProxy: ApperanceProxyType {\n"
             extensions += "\t\tget {\n"
-            extensions += "\t\t\tguard let proxy = objc_getAssociatedObject(self, &__ApperanceProxyHandle) as? ApperanceProxyType else { return S.\(style.name) }\n"
+            extensions += "\t\t\tguard let proxy = objc_getAssociatedObject(self, &__ApperanceProxyHandle) as? ApperanceProxyType else { return \(Configuration.stylesheetName).\(style.name) }\n"
             extensions += "\t\t\treturn proxy\n"
             extensions += "\t\t}\n"
             extensions += "\t\tset {\n"

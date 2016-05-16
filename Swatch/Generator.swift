@@ -15,7 +15,7 @@ public struct Configuration {
     public static var targetOsx = false
     public static var singleFile: String?
     public static var importFrameworks: String?
-    public static var stylesheetName: String? 
+    public static var stylesheetName: String = "S"
 }
 
 
