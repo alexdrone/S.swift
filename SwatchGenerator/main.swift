@@ -85,11 +85,12 @@ var args = [String](Process.arguments)
 
 if args.count == 1 {
     print("\n")
-    print("usage: sgen PROJECT_PATH (--file FILENAME) (--platform ios|osx) (--extensions internal|public) (--objc) --name STYLESHEET_NAME --inherit NAMESPACE")
+    print("usage: sgen PROJECT_PATH (--file FILENAME) --name STYLESHEET_NAME (--platform ios|osx) (--extensions internal|public) (--objc) --import FRAMEWORKS")
+    print("--file: If you're targetting one single file.")
+    print("--name: The default is S.")
     print("--platform: use the **platform** argument to target the desired platform. The default one is **ios**")
     print("--extensions: Creates extensions for the views that have a style defined in the stylesheet. *public* and *internal* define what the extensions' visibility modifier should be.")
     print("--objc: generates **Swift** code that is interoperable with **Objective C**")
-    print("--file: If you're targetting one single file.")
     print("\n")
     print("If you wish to **update** the generator, copy and paste this in your terminal:")
     print("curl \"https://raw.githubusercontent.com/alexdrone/S/master/sgen\" > sgen && mv sgen /usr/local/bin/sgen && chmod +x /usr/local/bin/sgen\n\n")
@@ -111,9 +112,9 @@ if args.contains("--name") {
         Configuration.stylesheetName = args[idx+1]
     }
 }
-if args.contains("--inherit") {
-    if let idx = args.indexOf("--inherit") {
-        Configuration.inheritNamespace = args[idx+1]
+if args.contains("--import") {
+    if let idx = args.indexOf("--import") {
+        Configuration.importFrameworks = args[idx+1]
     }
 }
 

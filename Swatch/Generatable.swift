@@ -512,7 +512,7 @@ extension Stylesheet: Generatable {
         stylesheet += "\n// swiftlint:disable type_body_length\n"
         stylesheet += "// swiftlint:disable type_name\n\n"
         stylesheet += "\nimport \(importDef)\n\n"
-        if let namespace = Configuration.inheritNamespace {
+        if let namespace = Configuration.importFrameworks {
             stylesheet += "\nimport \(namespace)\n\n"
         }
         
