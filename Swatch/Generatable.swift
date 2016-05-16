@@ -54,6 +54,9 @@ import Foundation
     ///An enum
     case Enum(type: String, name: String)
     
+    ///A call to the super stylesheet
+    case Call(call: String, type: String)
+    
     private var isHash: Bool {
         switch self {
         case .Hash: return true
@@ -155,7 +158,7 @@ import Foundation
             let right = parseNumber(components[3])
             return .EdgeInset(top: top, left: left, bottom: bottom, right: right)
             
-        } else if let components = argumentsFromString("Insets", string: string) {
+        } else if let components = argumentsFromString("insets", string: string) {
             assert(components.count == 4, "Not a valid edge inset. Format: EdgeInset(top, left, bottom, right)")
             let top = parseNumber(components[0])
             let left = parseNumber(components[1])
@@ -168,6 +171,12 @@ import Foundation
             let enumComponents = components.first!.componentsSeparatedByString(".")
             assert(enumComponents.count == 2, "An enum should be expressed in the form Type.Value")
             return .Enum(type: enumComponents[0], name: enumComponents[1])
+            
+        } else if let components = argumentsFromString("call", string: string) {
+            assert(components.count == 2, "Not a valid enum. Format: enum(Type.Value)")
+            let call = components[0].stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+            let type = components[1].stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+            return .Call(call: call, type: type)
         }
         
         throw RhsError.MalformedRhsValue(error: "Unable to parse rhs value")
@@ -190,6 +199,7 @@ import Foundation
         case .Rect(_, _, _, _): return "CGRect"
         case .EdgeInset(_, _, _, _): return  Configuration.targetOsx ? "NSEdgeInsets" : "UIEdgeInsets"
         case .Hash(let hash): for (_, rhs) in hash { return rhs.returnValue() }
+        case .Call(_, let type): return type
         }
         return "AnyObject"
     }
@@ -248,6 +258,9 @@ extension RhsValue: Generatable {
         case .EdgeInset(let top, let left, let bottom, let right):
             return generateEdgeInset(prefix, top: top, left: left, bottom: bottom, right: right)
             
+        case .Call(let call, _):
+            return generateCall(prefix, string: call)
+            
         case .Hash(let hash):
             var string = ""
             for (condition, rhs) in hash {
@@ -262,7 +275,8 @@ extension RhsValue: Generatable {
                 }
             }
             return string
-        }        
+        }
+
     }
     
     func generateScalar(prefix: String, float: Float) -> String {
@@ -325,6 +339,9 @@ extension RhsValue: Generatable {
         return "\(prefix)\(Configuration.targetOsx ? "NS" : "UI")EdgeInsets(top: \(top), left: \(left), bottom: \(bottom), right: \(right))"
     }
     
+    func generateCall(prefix: String, string: String) -> String {
+        return "\(prefix)\(string)"
+    }
 }
 
 //MARK: Property
@@ -495,6 +512,9 @@ extension Stylesheet: Generatable {
         stylesheet += "\n// swiftlint:disable type_body_length\n"
         stylesheet += "// swiftlint:disable type_name\n\n"
         stylesheet += "\nimport \(importDef)\n\n"
+        if let namespace = Configuration.inheritNamespace {
+            stylesheet += "\nimport \(namespace)\n\n"
+        }
         
         if Configuration.extensionsEnabled {
             stylesheet += self.generateExtensionsHeader()

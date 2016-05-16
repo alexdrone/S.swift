@@ -13,6 +13,10 @@ public struct Configuration {
     public static var extensionsEnabled = false
     public static var publicExtensions = false
     public static var targetOsx = false
+    public static var singleFile: String?
+    public static var inherit: String?
+    public static var inheritNamespace: String?
+    public static var stylesheetName: String? 
 }
 
 
@@ -65,7 +69,7 @@ public struct Generator: Generatable  {
             throw GeneratorError.MalformedYaml(error: "The root is not a dictionary")
         }
         
-        self.stylesheet = Stylesheet(name: "S", styles: styles)
+        self.stylesheet = Stylesheet(name: Configuration.stylesheetName ?? "S", styles: styles)
     }
     
     ///Returns the swift code for this item

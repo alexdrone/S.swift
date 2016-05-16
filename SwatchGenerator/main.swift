@@ -85,10 +85,11 @@ var args = [String](Process.arguments)
 
 if args.count == 1 {
     print("\n")
-    print("usage: sgen PROJECT_PATH (--platform ios|osx) (--extensions internal|public) (--objc)")
+    print("usage: sgen PROJECT_PATH (--file FILENAME) (--platform ios|osx) (--extensions internal|public) (--objc) --name STYLESHEET_NAME --inherit NAMESPACE")
     print("--platform: use the **platform** argument to target the desired platform. The default one is **ios**")
     print("--extensions: Creates extensions for the views that have a style defined in the stylesheet. *public* and *internal* define what the extensions' visibility modifier should be.")
     print("--objc: generates **Swift** code that is interoperable with **Objective C**")
+    print("--file: If you're targetting one single file.")
     print("\n")
     print("If you wish to **update** the generator, copy and paste this in your terminal:")
     print("curl \"https://raw.githubusercontent.com/alexdrone/S/master/sgen\" > sgen && mv sgen /usr/local/bin/sgen && chmod +x /usr/local/bin/sgen\n\n")
@@ -100,11 +101,31 @@ if args.contains("--objc") { Configuration.objcGeneration = true }
 if args.contains("--extensions") { Configuration.extensionsEnabled = true }
 if args.contains("public") { Configuration.publicExtensions = true }
 if args.contains("--platform") && args.contains("osx") { Configuration.targetOsx = true }
+if args.contains("--file") {
+    if let idx = args.indexOf("--file") {
+        Configuration.singleFile = args[idx+1]
+    }
+}
+if args.contains("--name") {
+    if let idx = args.indexOf("--name") {
+        Configuration.stylesheetName = args[idx+1]
+    }
+}
+if args.contains("--inherit") {
+    if let idx = args.indexOf("--inherit") {
+        Configuration.inheritNamespace = args[idx+1]
+    }
+}
 
 let path = args[1]
 let files = search(path)
 
 for file in files {
+    if let target = Configuration.singleFile {
+        if file.hasSuffix(target) {
+            generate(file)
+        }
+    }
     generate(file)
 }
 
