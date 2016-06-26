@@ -540,16 +540,10 @@ extension Stylesheet: Generatable {
     
     func generateAppExtensionApplicationHeader() -> String {
         var header = ""
-        header += "public protocol DynamicType {\n"
-        header += "\tstatic func preferredContentSizeCategory() -> String\n"
-        header += "}\n\n"
-        header += "public extension DynamicType {\n"
-        header += "\tpublic static func preferredContentSizeCategory() -> String {\n"
-        header += "\t\treturn UIContentSizeCategoryAccessibilityLarge\n"
-        header += "\t}\n"
-        header += "}\n\n"
-        header += "public struct Application: DynamicType {\n"
-        header += "\t\n"
+        header += "public class Application {\n"
+        header += "\tdynamic public class func preferredContentSizeCategory() -> String {\n"
+        header += "\t\treturn UIContentSizeCategoryLarge\n"
+        header += "\t}\n\n"
         header += "}\n\n"
         return header
     }
