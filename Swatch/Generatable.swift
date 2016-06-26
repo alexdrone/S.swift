@@ -543,7 +543,7 @@ extension Stylesheet: Generatable {
         header += "public class Application {\n"
         header += "\tdynamic public class func preferredContentSizeCategory() -> String {\n"
         header += "\t\treturn UIContentSizeCategoryLarge\n"
-        header += "\t}\n\n"
+        header += "\t}\n"
         header += "}\n\n"
         return header
     }
