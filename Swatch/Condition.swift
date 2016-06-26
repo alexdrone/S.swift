@@ -38,7 +38,7 @@ extension Condition: Generatable {
             case .Horizontal: string += "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) "
             case .Vertical: string += "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) "
             case .Idiom: string += "UIDevice.currentDevice().userInterfaceIdiom "
-            case .ContentSize: string += "UIApplication.sharedApplication().preferredContentSizeCategory "
+            case .ContentSize: string += (Configuration.appExtensionApiOnly ? "Application.preferredContentSizeCategory() " :  "UIApplication.sharedApplication().preferredContentSizeCategory ")
             case .Unspecified: string += "true "
             }
             

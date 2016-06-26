@@ -516,6 +516,10 @@ extension Stylesheet: Generatable {
             stylesheet += "\nimport \(namespace)\n\n"
         }
         
+        if Configuration.appExtensionApiOnly {
+            stylesheet += self.generateAppExtensionApplicationHeader()
+        }
+        
         if Configuration.extensionsEnabled {
             stylesheet += self.generateExtensionsHeader()
         }
@@ -532,6 +536,22 @@ extension Stylesheet: Generatable {
         }
         
         return stylesheet
+    }
+    
+    func generateAppExtensionApplicationHeader() -> String {
+        var header = ""
+        header += "public protocol DynamicType {\n"
+        header += "\tstatic func preferredContentSizeCategory() -> String\n"
+        header += "}\n\n"
+        header += "public extension DynamicType {\n"
+        header += "\tpublic static func preferredContentSizeCategory() -> String {\n"
+        header += "\t\treturn \"\"\n"
+        header += "\t}\n"
+        header += "}\n\n"
+        header += "public struct Application: DynamicType {\n"
+        header += "\t\n"
+        header += "}\n\n"
+        return header
     }
     
     func generateExtensionsHeader() -> String {
