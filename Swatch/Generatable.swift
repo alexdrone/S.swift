@@ -545,7 +545,7 @@ extension Stylesheet: Generatable {
         header += "}\n\n"
         header += "public extension DynamicType {\n"
         header += "\tpublic static func preferredContentSizeCategory() -> String {\n"
-        header += "\t\treturn \"\"\n"
+        header += "\t\treturn UIContentSizeCategoryAccessibilityLarge\n"
         header += "\t}\n"
         header += "}\n\n"
         header += "public struct Application: DynamicType {\n"
