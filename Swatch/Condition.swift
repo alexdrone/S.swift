@@ -35,7 +35,7 @@ extension Condition: Generatable {
             switch expression.expression.0 {
             case .Height: string += "\(size).height "
             case .Width: string += "\(size).width "
-            case .Horizontal: string += (Configuration.targetSwift3 ? "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) " : "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.unspecified) ")
+            case .Horizontal: string += (Configuration.targetSwift3 ? "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.unspecified) " : "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) ")
             case .Vertical: string += (Configuration.targetSwift3 ? "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.unspecified) " : "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) ")
             case .Idiom: string += (Configuration.targetSwift3 ? "UIDevice.current().userInterfaceIdiom " : "UIDevice.currentDevice().userInterfaceIdiom ")
             case .ContentSize: string += (Configuration.appExtensionApiOnly ? "Application.preferredContentSizeCategory() " :  "UIApplication.sharedApplication().preferredContentSizeCategory ")
