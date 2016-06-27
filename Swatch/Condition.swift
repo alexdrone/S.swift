@@ -17,7 +17,7 @@ extension Condition: Generatable {
         var expressions = [String]()
         for expression in self.expressions {
             
-            let size = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?.frame.size" : "UIScreen.mainScreen().bounds.size"
+            let size = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?.frame.size" : (Configuration.targetSwift3 ? "UIScreen.main().bounds.size" : "UIScreen.mainScreen().bounds.size")
             
             if Configuration.targetOsx {
                 switch expression.expression.0 {
@@ -35,9 +35,9 @@ extension Condition: Generatable {
             switch expression.expression.0 {
             case .Height: string += "\(size).height "
             case .Width: string += "\(size).width "
-            case .Horizontal: string += "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) "
-            case .Vertical: string += "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) "
-            case .Idiom: string += "UIDevice.currentDevice().userInterfaceIdiom "
+            case .Horizontal: string += (Configuration.targetSwift3 ? "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) " : "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.unspecified) ")
+            case .Vertical: string += (Configuration.targetSwift3 ? "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.unspecified) " : "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) ")
+            case .Idiom: string += (Configuration.targetSwift3 ? "UIDevice.current().userInterfaceIdiom " : "UIDevice.currentDevice().userInterfaceIdiom ")
             case .ContentSize: string += (Configuration.appExtensionApiOnly ? "Application.preferredContentSizeCategory() " :  "UIApplication.sharedApplication().preferredContentSizeCategory ")
             case .Unspecified: string += "true "
             }
@@ -54,10 +54,10 @@ extension Condition: Generatable {
             
             switch expression.expression.2 {
             case .Constant: string += "\(expression.expression.3)"
-            case .Compact: string += "UIUserInterfaceSizeClass.Compact"
-            case .Regular: string += "UIUserInterfaceSizeClass.Regular"
-            case .Pad: string += "UIUserInterfaceIdiom.Pad"
-            case .Phone: string += "UIUserInterfaceIdiom.Phone"
+            case .Compact: string += (Configuration.targetSwift3 ? "UIUserInterfaceSizeClass.compact" : "UIUserInterfaceSizeClass.Compact")
+            case .Regular: string += (Configuration.targetSwift3 ? "UIUserInterfaceSizeClass.regular" : "UIUserInterfaceSizeClass.Regular")
+            case .Pad: string += (Configuration.targetSwift3 ? "UIUserInterfaceIdiom.pad" : "UIUserInterfaceIdiom.Pad")
+            case .Phone: string += (Configuration.targetSwift3 ? "UIUserInterfaceIdiom.phone" : "UIUserInterfaceIdiom.Phone")
             case .ContentSizeExtraSmall: string += "UIContentSizeCategoryExtraSmall"
             case .ContentSizeSmall: string += "UIContentSizeCategorySmall"
             case .ContentSizeMedium: string += "UIContentSizeCategoryMedium"

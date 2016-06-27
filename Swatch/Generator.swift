@@ -14,6 +14,7 @@ public struct Configuration {
     public static var publicExtensions = false
     public static var appExtensionApiOnly = false
     public static var targetOsx = false
+    public static var targetSwift3 = false
     public static var singleFile: String?
     public static var importFrameworks: String?
     public static var stylesheetName: String = "S"

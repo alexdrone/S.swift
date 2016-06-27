@@ -85,7 +85,7 @@ var args = [String](Process.arguments)
 
 if args.count == 1 {
     print("\n")
-    print("usage: sgen PROJECT_PATH (--file FILENAME) --name STYLESHEET_NAME (--platform ios|osx) (--extensions internal|public) (--appExtension) (--objc) --import FRAMEWORKS")
+    print("usage: sgen PROJECT_PATH (--file FILENAME) --name STYLESHEET_NAME (--platform ios|osx) (--extensions internal|public) (--appExtension) (--objc) (--swift3) --import FRAMEWORKS")
     print("--file: If you're targetting one single file.")
     print("--name: The default is S.")
     print("--platform: use the **platform** argument to target the desired platform. The default one is **ios**")
@@ -100,6 +100,7 @@ if args.count == 1 {
 
 //configuration
 if args.contains("--objc") { Configuration.objcGeneration = true }
+if args.contains("--swift3") { Configuration.targetSwift3 = true }
 if args.contains("--appExtension") { Configuration.appExtensionApiOnly = true }
 if args.contains("--extensions") { Configuration.extensionsEnabled = true }
 if args.contains("public") { Configuration.publicExtensions = true }
