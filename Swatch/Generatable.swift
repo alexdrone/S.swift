@@ -369,7 +369,7 @@ extension Property: Generatable {
         
         //options
         let objc = Configuration.objcGeneration ? "@objc " : ""
-        let screen = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?" : (Configuration.targetSwift3 ? "UIScreen.main" : "UIScreen.mainScreen()")
+        let screen = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?" : (Configuration.targetSwift3 ? "UIScreen.main()" : "UIScreen.mainScreen()")
         let methodArgs =  Configuration.targetOsx ? "" : "_ traitCollection: UITraitCollection? = \(screen).traitCollection"
         let override = self.isOverride ? "override " : ""
         
