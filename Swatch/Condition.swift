@@ -31,6 +31,11 @@ extension Condition: Generatable {
                 }
             }
             
+            var apiAvailability = ""
+            if !Configuration.targetOsx && Configuration.targetSwift3 {
+                apiAvailability = Configuration.appExtensionApiOnly ? "#available(iOSApplicationExtension 10.0, *), " : "#available(iOS 10.0, *), "
+            }
+            
             var string = ""
             switch expression.expression.0 {
             case .Height: string += "\(size).height "
@@ -38,7 +43,7 @@ extension Condition: Generatable {
             case .Horizontal: string += (Configuration.targetSwift3 ? "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.unspecified) " : "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) ")
             case .Vertical: string += (Configuration.targetSwift3 ? "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.unspecified) " : "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) ")
             case .Idiom: string += (Configuration.targetSwift3 ? "UIDevice.current().userInterfaceIdiom " : "UIDevice.currentDevice().userInterfaceIdiom ")
-            case .ContentSize: string += (Configuration.appExtensionApiOnly ? "Application.preferredContentSizeCategory() " : (Configuration.targetSwift3 ? "UIApplication.shared().preferredContentSizeCategory " : "UIApplication.sharedApplication().preferredContentSizeCategory "))
+            case .ContentSize: string += apiAvailability + (Configuration.appExtensionApiOnly ? "Application.preferredContentSizeCategory() " : (Configuration.targetSwift3 ? "UIApplication.shared().preferredContentSizeCategory " : "UIApplication.sharedApplication().preferredContentSizeCategory "))
             case .Unspecified: string += "true "
             }
             
@@ -58,18 +63,18 @@ extension Condition: Generatable {
             case .Regular: string += (Configuration.targetSwift3 ? "UIUserInterfaceSizeClass.regular" : "UIUserInterfaceSizeClass.Regular")
             case .Pad: string += (Configuration.targetSwift3 ? "UIUserInterfaceIdiom.pad" : "UIUserInterfaceIdiom.Pad")
             case .Phone: string += (Configuration.targetSwift3 ? "UIUserInterfaceIdiom.phone" : "UIUserInterfaceIdiom.Phone")
-            case .ContentSizeExtraSmall: string += "UIContentSizeCategoryExtraSmall"
-            case .ContentSizeSmall: string += "UIContentSizeCategorySmall"
-            case .ContentSizeMedium: string += "UIContentSizeCategoryMedium"
-            case .ContentSizeLarge: string += "UIContentSizeCategoryLarge"
-            case .ContentSizeExtraLarge: string += "UIContentSizeCategoryExtraLarge"
-            case .ContentSizeExtraExtraLarge: string += "UIContentSizeCategoryExtraExtraLarge"
-            case .ContentSizeExtraExtraExtraLarge: string += "UIContentSizeCategoryExtraExtraExtraLarge"
-            case .ContentSizeAccessibilityMedium: string += "UIContentSizeCategoryAccessibilityMedium"
-            case .ContentSizeAccessibilityLarge: string += "UIContentSizeCategoryAccessibilityLarge"
-            case .ContentSizeAccessibilityExtraLarge: string += "UIContentSizeCategoryAccessibilityExtraLarge"
-            case .ContentSizeAccessibilityExtraExtraLarge: string += "UIContentSizeCategoryAccessibilityExtraExtraLarge"
-            case .ContentSizeAccessibilityExtraExtraExtraLarge: string += "UIContentSizeCategoryAccessibilityExtraExtraExtraLarge"
+            case .ContentSizeExtraSmall: string += (Configuration.targetSwift3 ? ".extraSmall" : "UIContentSizeCategoryExtraSmall")
+            case .ContentSizeSmall: string += (Configuration.targetSwift3 ? ".small" : "UIContentSizeCategorySmall")
+            case .ContentSizeMedium: string += (Configuration.targetSwift3 ? ".medium" : "UIContentSizeCategoryMedium")
+            case .ContentSizeLarge: string += (Configuration.targetSwift3 ? ".large" : "UIContentSizeCategoryLarge")
+            case .ContentSizeExtraLarge: string += (Configuration.targetSwift3 ? ".extraLarge" : "UIContentSizeCategoryExtraLarge")
+            case .ContentSizeExtraExtraLarge: string += (Configuration.targetSwift3 ? ".extraExtraLarge" : "UIContentSizeCategoryExtraExtraLarge")
+            case .ContentSizeExtraExtraExtraLarge: string += (Configuration.targetSwift3 ? ".extraExtraExtraLarge" : "UIContentSizeCategoryExtraExtraExtraLarge")
+            case .ContentSizeAccessibilityMedium: string += (Configuration.targetSwift3 ? ".accessibilityMedium" : "UIContentSizeCategoryAccessibilityMedium")
+            case .ContentSizeAccessibilityLarge: string += (Configuration.targetSwift3 ? ".accessibilityLarge" : "UIContentSizeCategoryAccessibilityLarge")
+            case .ContentSizeAccessibilityExtraLarge: string += (Configuration.targetSwift3 ? ".accessibilityExtraLarge" : "UIContentSizeCategoryAccessibilityExtraLarge")
+            case .ContentSizeAccessibilityExtraExtraLarge: string += (Configuration.targetSwift3 ? ".accessibilityExtraExtraLarge" : "UIContentSizeCategoryAccessibilityExtraExtraLarge")
+            case .ContentSizeAccessibilityExtraExtraExtraLarge: string += (Configuration.targetSwift3 ? ".accessibilityExtraExtraExtraLarge" : "UIContentSizeCategoryAccessibilityExtraExtraExtraLarge")
             case .Unspecified: string += ""
             }
             

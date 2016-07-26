@@ -542,8 +542,9 @@ extension Stylesheet: Generatable {
     func generateAppExtensionApplicationHeader() -> String {
         var header = ""
         header += "public class Application {\n"
-        header += "\tdynamic public class func preferredContentSizeCategory() -> String {\n"
-        header += "\t\treturn UIContentSizeCategoryLarge\n"
+        header += "\t@available(iOSApplicationExtension 10.0, *)\n"
+        header += "\tdynamic public class func preferredContentSizeCategory() -> UIContentSizeCategory {\n"
+        header += "\t\treturn .large\n"
         header += "\t}\n"
         header += "}\n\n"
         return header
