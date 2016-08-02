@@ -17,7 +17,7 @@ extension Condition: Generatable {
         var expressions = [String]()
         for expression in self.expressions {
             
-            let size = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?.frame.size" : (Configuration.targetSwift3 ? "UIScreen.main().bounds.size" : "UIScreen.mainScreen().bounds.size")
+            let size = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?.frame.size" : (Configuration.targetSwift3 ? "UIScreen.main.bounds.size" : "UIScreen.mainScreen().bounds.size")
             
             if Configuration.targetOsx {
                 switch expression.expression.0 {
@@ -31,19 +31,14 @@ extension Condition: Generatable {
                 }
             }
             
-            var apiAvailability = ""
-            if !Configuration.targetOsx && Configuration.targetSwift3 {
-                apiAvailability = Configuration.appExtensionApiOnly ? "#available(iOSApplicationExtension 10.0, *), " : "#available(iOS 10.0, *), "
-            }
-            
             var string = ""
             switch expression.expression.0 {
             case .Height: string += "\(size).height "
             case .Width: string += "\(size).width "
             case .Horizontal: string += (Configuration.targetSwift3 ? "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.unspecified) " : "(traitCollection?.horizontalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) ")
             case .Vertical: string += (Configuration.targetSwift3 ? "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.unspecified) " : "(traitCollection?.verticalSizeClass ?? UIUserInterfaceSizeClass.Unspecified) ")
-            case .Idiom: string += (Configuration.targetSwift3 ? "UIDevice.current().userInterfaceIdiom " : "UIDevice.currentDevice().userInterfaceIdiom ")
-            case .ContentSize: string += apiAvailability + (Configuration.appExtensionApiOnly ? "Application.preferredContentSizeCategory() " : (Configuration.targetSwift3 ? "UIApplication.shared().preferredContentSizeCategory " : "UIApplication.sharedApplication().preferredContentSizeCategory "))
+            case .Idiom: string += (Configuration.targetSwift3 ? "UIDevice.current.userInterfaceIdiom " : "UIDevice.currentDevice().userInterfaceIdiom ")
+            case .ContentSize: string += (Configuration.appExtensionApiOnly ? "Application.preferredContentSizeCategory() " : (Configuration.targetSwift3 ? "UIApplication.shared.preferredContentSizeCategory " : "UIApplication.sharedApplication().preferredContentSizeCategory "))
             case .Unspecified: string += "true "
             }
             

@@ -369,7 +369,7 @@ extension Property: Generatable {
         
         //options
         let objc = Configuration.objcGeneration ? "@objc " : ""
-        let screen = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?" : (Configuration.targetSwift3 ? "UIScreen.main()" : "UIScreen.mainScreen()")
+        let screen = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?" : (Configuration.targetSwift3 ? "UIScreen.main" : "UIScreen.mainScreen()")
         let methodArgs =  Configuration.targetOsx ? "" : "_ traitCollection: UITraitCollection? = \(screen).traitCollection"
         let override = self.isOverride ? "override " : ""
         
@@ -542,7 +542,6 @@ extension Stylesheet: Generatable {
     func generateAppExtensionApplicationHeader() -> String {
         var header = ""
         header += "public class Application {\n"
-        header += "\t@available(iOSApplicationExtension 10.0, *)\n"
         header += "\tdynamic public class func preferredContentSizeCategory() -> UIContentSizeCategory {\n"
         header += "\t\treturn .large\n"
         header += "\t}\n"
