@@ -364,7 +364,8 @@ extension Property: Generatable {
         var method = ""
         method += "\n\n\t\t//MARK: \(self.key) "
         if !self.isOverride {
-            method += "\n\t\tprivate var _\(self.key): \(self.rhs.returnValue())?"
+            let visibility = Configuration.targetSwift3 ? "fileprivate" : "private"
+            method += "\n\t\t\(visibility) var _\(self.key): \(self.rhs.returnValue())?"
         }
         
         //options
@@ -550,8 +551,9 @@ extension Stylesheet: Generatable {
     }
     
     func generateExtensionsHeader() -> String {
+        let visibility = Configuration.targetSwift3 ? "fileprivate" : "private"
         var header = ""
-        header += "private var __ApperanceProxyHandle: UInt8 = 0\n\n"
+        header += "\(visibility) var __ApperanceProxyHandle: UInt8 = 0\n\n"
         header += "///Your view should conform to 'AppearaceProxyComponent' in order to expose an appearance proxy\n"
         header += "public protocol AppearaceProxyComponent: class {\n"
         header += "\tassociatedtype ApperanceProxyType\n"
