@@ -12,7 +12,6 @@ public struct Configuration {
     public static var objcGeneration = false
     public static var extensionsEnabled = false
     public static var publicExtensions = false
-    public static var openExtensions = false
     public static var appExtensionApiOnly = false
     public static var targetOsx = false
     public static var targetSwift3 = false
@@ -20,7 +19,6 @@ public struct Configuration {
     public static var importFrameworks: String?
     public static var stylesheetName: String = "S"
 }
-
 
 public enum GeneratorError: ErrorType {
     case FileDoesNotExist(error: String)

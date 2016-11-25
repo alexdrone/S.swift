@@ -351,6 +351,7 @@ extension RhsValue: Generatable {
      var rhs: RhsValue
      let key: String
      var isOverride: Bool = false
+     var isOverridable: Bool = false
     
      init(key: String, rhs: RhsValue) {
         self.rhs = rhs
@@ -373,14 +374,15 @@ extension Property: Generatable {
         let screen = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?" : (Configuration.targetSwift3 ? "UIScreen.main" : "UIScreen.mainScreen()")
         let methodArgs =  Configuration.targetOsx ? "" : "_ traitCollection: UITraitCollection? = \(screen).traitCollection"
         let override = self.isOverride ? "override " : ""
+        let visibility = self.isOverridable ? "open" : "public"
         
-        method += "\n\t\t\(override)public func \(self.key)Property(\(methodArgs)) -> \(self.rhs.returnValue()) {"
+        method += "\n\t\t\(override)\(visibility) func \(self.key)Property(\(methodArgs)) -> \(self.rhs.returnValue()) {"
         method += "\n\t\t\tif let override = _\(self.key) { return override }"
         method += "\(rhs.generate())"
         method += "\n\t\t}"
         
         if !self.isOverride {
-            method += "\n\t\t\(objc)public var \(self.key): \(self.rhs.returnValue()) {"
+            method += "\n\t\t\(objc)\(visibility) var \(self.key): \(self.rhs.returnValue()) {"
             method += "\n\t\t\tget { return self.\(self.key)Property() }"
             method += "\n\t\t\tset { _\(self.key) = newValue }"
             method += "\n\t\t}"
@@ -397,6 +399,7 @@ extension Property: Generatable {
      var superclassName: String? = nil
      let properties: [Property]
      var isExtension = false
+     var isOverridable = false
     
      init(name: String, properties: [Property]) {
         
@@ -409,10 +412,20 @@ extension Property: Generatable {
             self.isExtension = true
         }
         
+        let openPrefix = "Open."
+        if styleName.containsString(openPrefix) {
+            styleName = styleName.stringByReplacingOccurrencesOfString(openPrefix, withString: "")
+            self.isOverridable = true
+        }
+        
         //superclass defined
         if let components = Optional(styleName.componentsSeparatedByString("<")) where components.count == 2 {
             styleName = components[0].stringByReplacingOccurrencesOfString(" ", withString: "")
             self.superclassName = components[1].stringByReplacingOccurrencesOfString(" ", withString: "")
+        }
+        
+        if self.isOverridable {
+            properties.forEach({ $0.isOverridable = true })
         }
         
         self.name = styleName
@@ -428,8 +441,9 @@ extension Style: Generatable {
         let objc = Configuration.objcGeneration ? "@objc " : ""
         var superclass = Configuration.objcGeneration ? ": NSObject" : ""
         if let s = self.superclassName { superclass = ": \(s)AppearanceProxy" }
-        wrapper += "\n\t\(objc)public static let \(self.name) = \(self.name)AppearanceProxy()"
-        wrapper += "\n\t\(objc)public class \(self.name)AppearanceProxy\(superclass) {"
+        let visibility = self.isOverridable ? "open" : "public"
+        wrapper += "\n\t\(objc)\(visibility) static let \(self.name) = \(self.name)AppearanceProxy()"
+        wrapper += "\n\t\(objc)\(visibility) class \(self.name)AppearanceProxy\(superclass) {"
         for property in self.properties {
             wrapper += property.generate()
         }
@@ -574,13 +588,8 @@ extension Stylesheet: Generatable {
     func generateExtensions() -> String {
         var extensions = ""
         for style in self.styles.filter({ $0.isExtension }) {
-            var visibility = ""
-            if Configuration.openExtensions {
-                visibility = "open"
-            } else if Configuration.publicExtensions {
-                visibility = "public"
-            }
-            
+            let visibility = Configuration.publicExtensions ? "public" : ""
+
             extensions += "\nextension \(style.name): AppearaceProxyComponent {\n\n"
             extensions += "\t\(visibility) typealias ApperanceProxyType = \(Configuration.stylesheetName).\(style.name)AppearanceProxy\n"
             extensions += "\t\(visibility) var appearanceProxy: ApperanceProxyType {\n"

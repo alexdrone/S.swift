@@ -104,7 +104,6 @@ if args.contains("--swift3") { Configuration.targetSwift3 = true }
 if args.contains("--appExtension") { Configuration.appExtensionApiOnly = true }
 if args.contains("--extensions") { Configuration.extensionsEnabled = true }
 if args.contains("public") { Configuration.publicExtensions = true }
-if args.contains("open") { Configuration.openExtensions = true }
 if args.contains("--platform") && args.contains("osx") { Configuration.targetOsx = true }
 if args.contains("--file") {
     if let idx = args.indexOf("--file") {
