@@ -385,7 +385,7 @@ extension Property: Generatable {
         method += "\n\t\t}"
         
         if !self.isOverride {
-            method += "\n\t\t\(objc)\(visibility) var \(self.key): \(self.rhs.returnValue()) {"
+            method += "\n\t\t\(objc)public var \(self.key): \(self.rhs.returnValue()) {"
             method += "\n\t\t\tget { return self.\(self.key)Property() }"
             method += "\n\t\t\tset { _\(self.key) = newValue }"
             method += "\n\t\t}"
