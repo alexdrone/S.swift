@@ -365,7 +365,10 @@ extension Property: Generatable {
         var method = ""
         method += "\n\n\t\t//MARK: \(self.key) "
         if !self.isOverride {
-            let visibility = Configuration.targetSwift3 ? "fileprivate" : "private"
+            var visibility = "private"
+            if Configuration.targetSwift3 {
+                visibility = self.isOverridable ? "public" : "fileprivate"
+            }
             method += "\n\t\t\(visibility) var _\(self.key): \(self.rhs.returnValue())?"
         }
         
