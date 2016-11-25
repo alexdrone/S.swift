@@ -447,6 +447,11 @@ extension Style: Generatable {
         let visibility = self.isOverridable ? "open" : "public"
         wrapper += "\n\t\(objc)\(visibility) static let \(self.name) = \(self.name)AppearanceProxy()"
         wrapper += "\n\t\(objc)\(visibility) class \(self.name)AppearanceProxy\(superclass) {"
+        
+        if self.isOverridable {
+            wrapper += "\n\t\tpublic init() {}"
+        }
+        
         for property in self.properties {
             wrapper += property.generate()
         }
