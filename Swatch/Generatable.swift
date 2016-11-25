@@ -472,7 +472,15 @@ extension Style: Generatable {
     
     //determines if this property is an override or not
     private func propertyIsOverride(property: String, superclass: String) -> Bool {
-        let style = self.styles.filter() { return $0.name == superclass}.first!
+        
+        guard let style = self.styles.filter({ return $0.name == superclass }).first else {
+            
+            if let components = Optional(superclass.componentsSeparatedByString(".")) where components.count == 2 {
+                return true
+            }
+            return false
+        }
+        
         if let _ = style.properties.filter({ return $0.key == property }).first {
             return true
         } else {
@@ -566,7 +574,13 @@ extension Stylesheet: Generatable {
     func generateExtensions() -> String {
         var extensions = ""
         for style in self.styles.filter({ $0.isExtension }) {
-            let visibility = Configuration.publicExtensions ? "public" : ""
+            var visibility = ""
+            if Configuration.openExtensions {
+                visibility = "open"
+            } else if Configuration.publicExtensions {
+                visibility = "public"
+            }
+            
             extensions += "\nextension \(style.name): AppearaceProxyComponent {\n\n"
             extensions += "\t\(visibility) typealias ApperanceProxyType = \(Configuration.stylesheetName).\(style.name)AppearanceProxy\n"
             extensions += "\t\(visibility) var appearanceProxy: ApperanceProxyType {\n"
