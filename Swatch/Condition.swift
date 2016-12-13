@@ -17,7 +17,7 @@ extension Condition: Generatable {
         var expressions = [String]()
         for expression in self.expressions {
             
-            let size = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?.frame.size" : (Configuration.targetSwift3 ? "UIScreen.main.bounds.size" : "UIScreen.mainScreen().bounds.size")
+            let size = Configuration.targetOsx ? "NSApplication.sharedApplication().mainWindow?.frame.size" : "UIScreen.screenBounds.size"
             
             if Configuration.targetOsx {
                 switch expression.expression.0 {
