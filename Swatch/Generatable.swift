@@ -552,10 +552,6 @@ extension Stylesheet: Generatable {
             stylesheet += self.generateAppExtensionApplicationHeader()
         }
         
-        if Configuration.targetOsx == false {
-            stylesheet += self.generateScreenExtensionHeader()
-        }
-        
         if Configuration.extensionsEnabled {
             stylesheet += self.generateExtensionsHeader()
         }
@@ -583,19 +579,7 @@ extension Stylesheet: Generatable {
         header += "}\n\n"
         return header
     }
-    
-    func generateScreenExtensionHeader() -> String {
-        let screen = (Configuration.targetSwift3 ? "UIScreen.main" : "UIScreen.mainScreen()")
-        var header = ""
-        header += "extension UIScreen {\n"
-        header += "\tvar screenBounds: CGRect {\n"
-        header += "\t\tlet screen = \(screen)\n"
-        header += "\t\treturn screen.coordinateSpace.convert(screen.bounds, to: screen.fixedCoordinateSpace)\n"
-        header += "\t}\n"
-        header += "}\n\n"
-        return header
-    }
-    
+
     func generateExtensionsHeader() -> String {
         let visibility = Configuration.targetSwift3 ? "fileprivate" : "private"
         var header = ""
