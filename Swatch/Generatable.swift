@@ -564,7 +564,7 @@ extension Stylesheet: Generatable {
         stylesheet += "\n}"
         
         if Configuration.extensionsEnabled {
-            stylesheet += "\n" + self.generateExtensions()
+            stylesheet += self.generateExtensions()
         }
         
         return stylesheet
@@ -598,7 +598,7 @@ extension Stylesheet: Generatable {
         for style in self.styles.filter({ $0.isExtension }) {
             let visibility = Configuration.publicExtensions ? "public" : ""
 
-            extensions += "extension \(style.name): AppearaceProxyComponent {\n\n"
+            extensions += "\nextension \(style.name): AppearaceProxyComponent {\n\n"
             extensions += "\t\(visibility) typealias ApperanceProxyType = \(Configuration.stylesheetName).\(style.name)AppearanceProxy\n"
             extensions += "\t\(visibility) var appearanceProxy: ApperanceProxyType {\n"
             extensions += "\t\tget {\n"
@@ -610,7 +610,7 @@ extension Stylesheet: Generatable {
             extensions += "\t\t\tdidChangeAppearanceProxy()\n"
             extensions += "\t\t}\n"
             extensions += "\t}\n"
-            extensions += "}\n\n"
+            extensions += "}\n"
         }
         
         return extensions
