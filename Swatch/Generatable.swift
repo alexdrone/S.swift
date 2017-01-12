@@ -564,7 +564,7 @@ extension Stylesheet: Generatable {
         stylesheet += "\n}"
         
         if Configuration.extensionsEnabled {
-            stylesheet += self.generateExtensions()
+            stylesheet += "\n" + self.generateExtensions()
         }
         
         return stylesheet
