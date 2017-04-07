@@ -1,7 +1,4 @@
 //
-//  Yaml.swift
-//  Swatch
-//
 //  Created by Alex Usbergo on 19/02/16.
 //  Copyright © 2016 Alex Usbergo. All rights reserved.
 //
