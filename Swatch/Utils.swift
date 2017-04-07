@@ -1,15 +1,12 @@
 //
-//  Utils.swift
-//  Swatch
-//
 //  Created by Alex Usbergo on 19/02/16.
 //  Copyright © 2016 Alex Usbergo. All rights reserved.
 //
 
 import Foundation
 
-///Returns the arguments strings from a rule string
-///e.g. font("Comic Sans", 12) -> ["Comic Sans", "12"]
+/// Returns the arguments strings from a rule string
+/// e.g. font("Comic Sans", 12) -> ["Comic Sans", "12"]
 func argumentsFromString(key: String, string: String) -> [String]? {
     
     let input = string.stringByReplacingOccurrencesOfString(key.capitalizedString, withString: key);
@@ -24,7 +21,7 @@ func argumentsFromString(key: String, string: String) -> [String]? {
     return parsableString.componentsSeparatedByString(",")
 }
 
-///Parse a number from a string
+/// Parse a number from a string
 func parseNumber(string: String) -> Float {
     var input = string.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
     input = (input as NSString).stringByReplacingOccurrencesOfString("\"", withString: "")
@@ -40,7 +37,7 @@ func parseNumber(string: String) -> Float {
     return 0
 }
 
-///Additional preprocessing for the string
+/// Additional preprocessing for the string
 func preprocessInput(string: String) -> String {
     var result = string.stringByReplacingOccurrencesOfString("#", withString: "color(");
     result = result.stringByReplacingOccurrencesOfString("$", withString: "redirect(");

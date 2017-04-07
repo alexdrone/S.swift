@@ -1,9 +1,8 @@
-#S
+#S.swift
 
 [![Bin](https://img.shields.io/badge/binary-download-green.svg?style=flat)](https://raw.githubusercontent.com/alexdrone/S/master/sgen)
-[![Platform](https://img.shields.io/badge/platform-ios | osx | watchos | tvos -lightgrey.svg?style=flat)](#)
+[![Platform](https://img.shields.io/badge/platform-ios|osx|watchos|tvos-lightgrey.svg?style=flat)](#)
 [![Build](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
-
 
 _Get strong typed, autocompleted resources, color swatches and font styles in Swift projects (iOS or OSX) from a simple, human readable Yaml stylesheet_
 
@@ -194,6 +193,6 @@ A condition has instead the following form
 
 ```
 
-##Credits
+## Credits
 
 **S** uses [YamlSwift](https://github.com/behrang/YamlSwift) from *behrang* as Yaml parser

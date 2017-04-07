@@ -1,7 +1,4 @@
 //
-//  UIColor+Hex.swift
-//  Swatch
-//
 //  Created by Alex Usbergo on 20/02/16.
 //  Copyright © 2016 Alex Usbergo. All rights reserved.
 //
