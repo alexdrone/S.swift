@@ -1,4 +1,4 @@
-#S.swift
+# S.swift
 
 [![Bin](https://img.shields.io/badge/binary-download-green.svg?style=flat)](https://raw.githubusercontent.com/alexdrone/S/master/sgen)
 [![Platform](https://img.shields.io/badge/platform-ios|osx|watchos|tvos-lightgrey.svg?style=flat)](#)
