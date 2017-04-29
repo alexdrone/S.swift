@@ -7,7 +7,7 @@ import Cocoa
 
 fileprivate var __ApperanceProxyHandle: UInt8 = 0
 
-/// Your view should conform to 'AppearaceProxyComponent' in order to expose an appearance proxy
+/// Your view should conform to 'AppearaceProxyComponent'.
 public protocol AppearaceProxyComponent: class {
 	associatedtype ApperanceProxyType
 	var appearanceProxy: ApperanceProxyType { get }
@@ -21,6 +21,17 @@ public class S {
 	public static let DefaultButton = DefaultButtonAppearanceProxy()
 	public class DefaultButtonAppearanceProxy: FooViewAppearanceProxy {
 
+		//MARK: color 
+		fileprivate var _color: NSColor?
+		public func colorProperty() -> NSColor {
+			if let override = _color { return override }
+			return Color.blueProperty()
+		}
+		public var color: NSColor {
+			get { return self.colorProperty() }
+			set { _color = newValue }
+		}
+
 		//MARK: opaque 
 		override public func opaqueProperty() -> Bool {
 			if let override = _opaque { return override }
@@ -31,17 +42,6 @@ public class S {
 		override public func marginProperty() -> CGFloat {
 			if let override = _margin { return override }
 			return CGFloat(12.0)
-		}
-
-		//MARK: color 
-		fileprivate var _color: NSColor?
-		public func colorProperty() -> NSColor {
-			if let override = _color { return override }
-			return Color.blueProperty()
-		}
-		public var color: NSColor {
-			get { return self.colorProperty() }
-			set { _color = newValue }
 		}
 	}
 //MARK: - Typography
@@ -70,6 +70,36 @@ public class S {
 			set { _medium = newValue }
 		}
 	}
+//MARK: - Color
+	public static let Color = ColorAppearanceProxy()
+	public class ColorAppearanceProxy {
+
+		//MARK: red 
+		fileprivate var _red: NSColor?
+		public func redProperty() -> NSColor {
+			if let override = _red { return override }
+			if NSApplication.shared().mainWindow?.frame.size.width < 300.0 { 
+			return NSColor(red: 0.666667, green: 0.0, blue: 0.0, alpha: 1.0)
+			}
+			
+			return NSColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
+		}
+		public var red: NSColor {
+			get { return self.redProperty() }
+			set { _red = newValue }
+		}
+
+		//MARK: blue 
+		fileprivate var _blue: NSColor?
+		public func blueProperty() -> NSColor {
+			if let override = _blue { return override }
+			return NSColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
+		}
+		public var blue: NSColor {
+			get { return self.blueProperty() }
+			set { _blue = newValue }
+		}
+	}
 //MARK: - FooView
 	public static let FooView = FooViewAppearanceProxy()
 	public class FooViewAppearanceProxy {
@@ -83,17 +113,6 @@ public class S {
 		public var backgroundColor: NSColor {
 			get { return self.backgroundColorProperty() }
 			set { _backgroundColor = newValue }
-		}
-
-		//MARK: margin 
-		fileprivate var _margin: CGFloat?
-		public func marginProperty() -> CGFloat {
-			if let override = _margin { return override }
-			return CGFloat(12.0)
-		}
-		public var margin: CGFloat {
-			get { return self.marginProperty() }
-			set { _margin = newValue }
 		}
 
 		//MARK: font 
@@ -117,35 +136,16 @@ public class S {
 			get { return self.opaqueProperty() }
 			set { _opaque = newValue }
 		}
-	}
-//MARK: - Color
-	public static let Color = ColorAppearanceProxy()
-	public class ColorAppearanceProxy {
 
-		//MARK: blue 
-		fileprivate var _blue: NSColor?
-		public func blueProperty() -> NSColor {
-			if let override = _blue { return override }
-			return NSColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
+		//MARK: margin 
+		fileprivate var _margin: CGFloat?
+		public func marginProperty() -> CGFloat {
+			if let override = _margin { return override }
+			return CGFloat(12.0)
 		}
-		public var blue: NSColor {
-			get { return self.blueProperty() }
-			set { _blue = newValue }
-		}
-
-		//MARK: red 
-		fileprivate var _red: NSColor?
-		public func redProperty() -> NSColor {
-			if let override = _red { return override }
-			if NSApplication.sharedApplication().mainWindow?.frame.size.width < 300.0 { 
-			return NSColor(red: 0.666667, green: 0.0, blue: 0.0, alpha: 1.0)
-			}
-			
-			return NSColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
-		}
-		public var red: NSColor {
-			get { return self.redProperty() }
-			set { _red = newValue }
+		public var margin: CGFloat {
+			get { return self.marginProperty() }
+			set { _margin = newValue }
 		}
 	}
 
