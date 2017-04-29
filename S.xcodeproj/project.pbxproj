@@ -15,7 +15,6 @@
 		164DC7101C7F571600859EC0 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16AC37191C7772EE00F61BE9 /* Utils.swift */; };
 		168354431C808BA8008EA29F /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168354421C808BA8008EA29F /* Condition.swift */; };
 		168354441C808BA8008EA29F /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168354421C808BA8008EA29F /* Condition.swift */; };
-		168354461C808BCB008EA29F /* Style.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168354451C808BCB008EA29F /* Style.generated.swift */; };
 		16AC371A1C7772EE00F61BE9 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16AC37191C7772EE00F61BE9 /* Utils.swift */; };
 		16AC371C1C78C69B00F61BE9 /* Rhs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16AC371B1C78C69B00F61BE9 /* Rhs.swift */; };
 		16F8FAE51C78D9F40055BA8F /* Generator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F8FAE41C78D9F40055BA8F /* Generator.swift */; };
@@ -185,10 +184,11 @@
 				TargetAttributes = {
 					16F9E0341C772AAC0083C55D = {
 						CreatedOnToolsVersion = 7.2.1;
+						LastSwiftMigration = 0820;
 					};
 					16F9E0521C772AD30083C55D = {
 						CreatedOnToolsVersion = 7.2.1;
-						LastSwiftMigration = 0810;
+						LastSwiftMigration = 0820;
 					};
 				};
 			};
@@ -232,7 +232,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SRCROOT/sgen $SRCROOT --platform osx --extensions public\n";
+			shellScript = "//$SRCROOT/sgen $SRCROOT --platform osx --extensions public\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -246,7 +246,6 @@
 				16F9E05B1C772B080083C55D /* Yaml.swift in Sources */,
 				16AC371A1C7772EE00F61BE9 /* Utils.swift in Sources */,
 				16F8FAE51C78D9F40055BA8F /* Generator.swift in Sources */,
-				168354461C808BCB008EA29F /* Style.generated.swift in Sources */,
 				16AC371C1C78C69B00F61BE9 /* Rhs.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -379,7 +378,7 @@
 				PRODUCT_NAME = S;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 2.3;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -397,7 +396,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.au.S;
 				PRODUCT_NAME = S;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 2.3;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -408,7 +407,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_NAME = S;
 				SDKROOT = macosx;
-				SWIFT_VERSION = 2.3;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -419,7 +418,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_NAME = S;
 				SDKROOT = macosx;
-				SWIFT_VERSION = 2.3;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

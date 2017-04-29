@@ -1,280 +1,1088 @@
-//
-//  Created by Alex Usbergo on 19/02/16.
-//  Copyright © 2016 Alex Usbergo. All rights reserved.
-//
-// Forked from behrang/YamlSwift
-//
+// Forked from https://github.com/behrang/YamlSwift
 
 import Foundation
 
-infix operator |> { associativity left }
-func |> <T, U> (x: T, f: T -> U) -> U {
+infix operator |>: Functional
+func |> <T, U> (x: T, f: (T) -> U) -> U {
   return f(x)
 }
 
-func count<T:CollectionType>(collection: T) -> T.Index.Distance {
-  return collection.count
-}
-
-func count(string: String) -> String.Index.Distance {
-  return string.characters.count
-}
-
-struct Context {
-  let tokens: [TokenMatch]
-  let aliases: [String: Yaml]
-
-  init (_ tokens: [TokenMatch], _ aliases: [String: Yaml] = [:]) {
-    self.tokens = tokens
-    self.aliases = aliases
+extension Yaml {
+  enum TokenType: Swift.String {
+    case yamlDirective = "%YAML"
+    case docStart = "doc-start"
+    case docend = "doc-end"
+    case comment = "comment"
+    case space = "space"
+    case newLine = "newline"
+    case indent = "indent"
+    case dedent = "dedent"
+    case null = "null"
+    case _true = "true"
+    case _false = "false"
+    case infinityP = "+infinity"
+    case infinityN = "-infinity"
+    case nan = "nan"
+    case double = "double"
+    case int = "int"
+    case intOct = "int-oct"
+    case intHex = "int-hex"
+    case intSex = "int-sex"
+    case anchor = "&"
+    case alias = "*"
+    case comma = ","
+    case openSB = "["
+    case closeSB = "]"
+    case dash = "-"
+    case openCB = "{"
+    case closeCB = "}"
+    case key = "key"
+    case keyDQ = "key-dq"
+    case keySQ = "key-sq"
+    case questionMark = "?"
+    case colonFO = ":-flow-out"
+    case colonFI = ":-flow-in"
+    case colon = ":"
+    case literal = "|"
+    case folded = ">"
+    case reserved = "reserved"
+    case stringDQ = "string-dq"
+    case stringSQ = "string-sq"
+    case stringFI = "string-flow-in"
+    case stringFO = "string-flow-out"
+    case string = "string"
+    case end = "end"
   }
 }
 
-typealias ContextValue = (context: Context, value: Yaml)
-func createContextValue (context: Context) -> Yaml -> ContextValue {
+private typealias TokenPattern = (type: Yaml.TokenType, pattern: NSRegularExpression)
+
+extension Yaml {
+  typealias TokenMatch = (type: Yaml.TokenType, match: String)
+}
+
+private let bBreak = "(?:\\r\\n|\\r|\\n)"
+
+// printable non-space chars,
+// except `:`(3a), `#`(23), `,`(2c), `[`(5b), `]`(5d), `{`(7b), `}`(7d)
+private let safeIn = "\\x21\\x22\\x24-\\x2b\\x2d-\\x39\\x3b-\\x5a\\x5c\\x5e-\\x7a" +
+  "\\x7c\\x7e\\x85\\xa0-\\ud7ff\\ue000-\\ufefe\\uff00\\ufffd" +
+"\\U00010000-\\U0010ffff"
+// with flow indicators: `,`, `[`, `]`, `{`, `}`
+private let safeOut = "\\x2c\\x5b\\x5d\\x7b\\x7d" + safeIn
+private let plainOutPattern =
+"([\(safeOut)]#|:(?![ \\t]|\(bBreak))|[\(safeOut)]|[ \\t])+"
+private let plainInPattern =
+"([\(safeIn)]#|:(?![ \\t]|\(bBreak))|[\(safeIn)]|[ \\t]|\(bBreak))+"
+private let dashPattern = Yaml.Regex.regex("^-([ \\t]+(?!#|\(bBreak))|(?=[ \\t\\n]))")
+private let finish = "(?= *(,|\\]|\\}|( #.*)?(\(bBreak)|$)))"
+
+private let tokenPatterns: [TokenPattern] = [
+  (.yamlDirective, Yaml.Regex.regex("^%YAML(?= )")),
+  (.docStart, Yaml.Regex.regex("^---")),
+  (.docend, Yaml.Regex.regex("^\\.\\.\\.")),
+  (.comment, Yaml.Regex.regex("^#.*|^\(bBreak) *(#.*)?(?=\(bBreak)|$)")),
+  (.space, Yaml.Regex.regex("^ +")),
+  (.newLine, Yaml.Regex.regex("^\(bBreak) *")),
+  (.dash, dashPattern!),
+  (.null, Yaml.Regex.regex("^(null|Null|NULL|~)\(finish)")),
+  (._true, Yaml.Regex.regex("^(true|True|TRUE)\(finish)")),
+  (._false, Yaml.Regex.regex("^(false|False|FALSE)\(finish)")),
+  (.infinityP, Yaml.Regex.regex("^\\+?\\.(inf|Inf|INF)\(finish)")),
+  (.infinityN, Yaml.Regex.regex("^-\\.(inf|Inf|INF)\(finish)")),
+  (.nan, Yaml.Regex.regex("^\\.(nan|NaN|NAN)\(finish)")),
+  (.int, Yaml.Regex.regex("^[-+]?[0-9]+\(finish)")),
+  (.intOct, Yaml.Regex.regex("^0o[0-7]+\(finish)")),
+  (.intHex, Yaml.Regex.regex("^0x[0-9a-fA-F]+\(finish)")),
+  (.intSex, Yaml.Regex.regex("^[0-9]{2}(:[0-9]{2})+\(finish)")),
+  (.double, Yaml.Regex.regex("^[-+]?(\\.[0-9]+|[0-9]+(\\.[0-9]*)?)([eE][-+]?[0-9]+)?\(finish)")),
+  (.anchor, Yaml.Regex.regex("^&\\w+")),
+  (.alias, Yaml.Regex.regex("^\\*\\w+")),
+  (.comma, Yaml.Regex.regex("^,")),
+  (.openSB, Yaml.Regex.regex("^\\[")),
+  (.closeSB, Yaml.Regex.regex("^\\]")),
+  (.openCB, Yaml.Regex.regex("^\\{")),
+  (.closeCB, Yaml.Regex.regex("^\\}")),
+  (.questionMark, Yaml.Regex.regex("^\\?( +|(?=\(bBreak)))")),
+  (.colonFO, Yaml.Regex.regex("^:(?!:)")),
+  (.colonFI, Yaml.Regex.regex("^:(?!:)")),
+  (.literal, Yaml.Regex.regex("^\\|.*")),
+  (.folded, Yaml.Regex.regex("^>.*")),
+  (.reserved, Yaml.Regex.regex("^[@`]")),
+  (.stringDQ, Yaml.Regex.regex("^\"([^\\\\\"]|\\\\(.|\(bBreak)))*\"")),
+  (.stringSQ, Yaml.Regex.regex("^'([^']|'')*'")),
+  (.stringFO, Yaml.Regex.regex("^\(plainOutPattern)(?=:([ \\t]|\(bBreak))|\(bBreak)|$)")),
+  (.stringFI, Yaml.Regex.regex("^\(plainInPattern)")),
+]
+
+extension Yaml {
+  static func escapeErrorContext (_ text: String) -> String {
+    let endIndex = text.index(text.startIndex,
+                              offsetBy: 50,
+                              limitedBy: text.endIndex) ?? text.endIndex
+    let escaped = text.substring(to: endIndex)
+      |> Yaml.Regex.replace(Yaml.Regex.regex("\\r"), template: "\\\\r")
+      |> Yaml.Regex.replace(Yaml.Regex.regex("\\n"), template: "\\\\n")
+      |> Yaml.Regex.replace(Yaml.Regex.regex("\""), template: "\\\\\"")
+    return "near \"\(escaped)\""
+  }
+
+
+  static func tokenize (_ text: String) -> YAMLResult<[TokenMatch]> {
+    var text = text
+    var matchList: [TokenMatch] = []
+    var indents = [0]
+    var insideFlow = 0
+    next:
+      while text.endIndex > text.startIndex {
+        for tokenPattern in tokenPatterns {
+          let range = Yaml.Regex.matchRange(text, regex: tokenPattern.pattern)
+          if range.location != NSNotFound {
+            let rangeend = range.location + range.length
+            switch tokenPattern.type {
+
+            case .newLine:
+              let match = text |> Yaml.Regex.substringWithRange(range)
+              let lastindent = indents.last ?? 0
+              let rest = match.substring(from: match.index(after: match.startIndex))
+              let spaces = rest.characters.count
+              let nestedBlockSequence =
+                Yaml.Regex.matches(text |> Yaml.Regex.substringFromIndex(rangeend),
+                                   regex: dashPattern!)
+              if spaces == lastindent {
+                matchList.append(TokenMatch(.newLine, match))
+              } else if spaces > lastindent {
+                if insideFlow == 0 {
+                  if matchList.last != nil &&
+                    matchList[matchList.endIndex - 1].type == .indent {
+                    indents[indents.endIndex - 1] = spaces
+                    matchList[matchList.endIndex - 1] = TokenMatch(.indent, match)
+                  } else {
+                    indents.append(spaces)
+                    matchList.append(TokenMatch(.indent, match))
+                  }
+                }
+              } else if nestedBlockSequence && spaces == lastindent - 1 {
+                matchList.append(TokenMatch(.newLine, match))
+              } else {
+                while nestedBlockSequence && spaces < (indents.last ?? 0) - 1
+                  || !nestedBlockSequence && spaces < indents.last ?? 0 {
+                    indents.removeLast()
+                    matchList.append(TokenMatch(.dedent, ""))
+                }
+                matchList.append(TokenMatch(.newLine, match))
+              }
+
+            case .dash, .questionMark:
+              let match = text |> Yaml.Regex.substringWithRange(range)
+              let index = match.index(after: match.startIndex)
+              let indent = match.characters.count
+              indents.append((indents.last ?? 0) + indent)
+              matchList.append(
+                TokenMatch(tokenPattern.type, match.substring(to: index)))
+              matchList.append(TokenMatch(.indent, match.substring(from: index)))
+
+            case .colonFO:
+              if insideFlow > 0 {
+                continue
+              }
+              fallthrough
+
+            case .colonFI:
+              let match = text |> Yaml.Regex.substringWithRange(range)
+              matchList.append(TokenMatch(.colon, match))
+              if insideFlow == 0 {
+                indents.append((indents.last ?? 0) + 1)
+                matchList.append(TokenMatch(.indent, ""))
+              }
+
+            case .openSB, .openCB:
+              insideFlow += 1
+              matchList.append(
+                TokenMatch(tokenPattern.type, text |> Yaml.Regex.substringWithRange(range)))
+
+            case .closeSB, .closeCB:
+              insideFlow -= 1
+              matchList.append(
+                TokenMatch(tokenPattern.type, text |> Yaml.Regex.substringWithRange(range)))
+
+            case .literal, .folded:
+              matchList.append(
+                TokenMatch(tokenPattern.type, text |> Yaml.Regex.substringWithRange(range)))
+              text = text |> Yaml.Regex.substringFromIndex(rangeend)
+              let lastindent = indents.last ?? 0
+              let minindent = 1 + lastindent
+              let blockPattern = Yaml.Regex.regex(("^(\(bBreak) *)*(\(bBreak)" +
+                "( {\(minindent),})[^ ].*(\(bBreak)( *|\\3.*))*)(?=\(bBreak)|$)"))
+              let (lead, rest) = text |> Yaml.Regex.splitLead(blockPattern!)
+              text = rest
+              let block = (lead
+                |> Yaml.Regex.replace(Yaml.Regex.regex("^\(bBreak)"), template: "")
+                |> Yaml.Regex.replace(Yaml.Regex.regex("^ {0,\(lastindent)}"), template: "")
+                |> Yaml.Regex.replace(Yaml.Regex.regex("\(bBreak) {0,\(lastindent)}"), template: "\n")
+                ) + (Yaml.Regex.matches(text, regex: Yaml.Regex.regex("^\(bBreak)"))
+                      && lead.endIndex > lead.startIndex
+                  ? "\n" : "")
+              matchList.append(TokenMatch(.string, block))
+              continue next
+
+            case .stringFO:
+              if insideFlow > 0 {
+                continue
+              }
+              let indent = (indents.last ?? 0)
+              let blockPattern = Yaml.Regex.regex(("^\(bBreak)( *| {\(indent),}" +
+                "\(plainOutPattern))(?=\(bBreak)|$)"))
+              var block = text
+                |> Yaml.Regex.substringWithRange(range)
+                |> Yaml.Regex.replace(Yaml.Regex.regex("^[ \\t]+|[ \\t]+$"), template: "")
+              text = text |> Yaml.Regex.substringFromIndex(rangeend)
+              while true {
+                let range = Yaml.Regex.matchRange(text, regex: blockPattern!)
+                if range.location == NSNotFound {
+                  break
+                }
+                let s = text |> Yaml.Regex.substringWithRange(range)
+                block += "\n" +
+                  Yaml.Regex.replace(
+                    Yaml.Regex.regex("^\(bBreak)[ \\t]*|[ \\t]+$"), template: "")(s)
+                text = text |> Yaml.Regex.substringFromIndex(range.location + range.length)
+              }
+              matchList.append(TokenMatch(.string, block))
+              continue next
+
+            case .stringFI:
+              let match = text
+                |> Yaml.Regex.substringWithRange(range)
+                |> Yaml.Regex.replace(Yaml.Regex.regex("^[ \\t]|[ \\t]$"), template: "")
+              matchList.append(TokenMatch(.string, match))
+
+            case .reserved:
+              return fail(escapeErrorContext(text))
+
+            default:
+              matchList.append(TokenMatch(tokenPattern.type, text |>
+                  Yaml.Regex.substringWithRange(range)))
+            }
+            text = text |> Yaml.Regex.substringFromIndex(rangeend)
+            continue next
+          }
+        }
+        return fail(escapeErrorContext(text))
+    }
+    while indents.count > 1 {
+      indents.removeLast()
+      matchList.append((.dedent, ""))
+    }
+    matchList.append((.end, ""))
+    return lift(matchList)
+  }
+}
+
+import Foundation
+
+public enum Yaml {
+  case null
+  case bool(Swift.Bool)
+  case int(Swift.Int)
+  case double(Swift.Double)
+  case string(Swift.String)
+  case array([Yaml])
+  case dictionary([Yaml: Yaml])
+
+  static public func == (lhs: Yaml, rhs: Yaml) -> Bool {
+    switch (lhs, rhs) {
+    case (.null, .null):
+      return true
+    case (.bool(let lv), .bool(let rv)):
+      return lv == rv
+    case (.int(let lv), .int(let rv)):
+      return lv == rv
+    case (.int(let lv), .double(let rv)):
+      return Double(lv) == rv
+    case (.double(let lv), .double(let rv)):
+      return lv == rv
+    case (.double(let lv), .int(let rv)):
+      return lv == Double(rv)
+    case (.string(let lv), .string(let rv)):
+      return lv == rv
+    case (.array(let lv), .array(let rv)):
+      return lv == rv
+    case (.dictionary(let lv), .dictionary(let rv)):
+      return lv == rv
+    default:
+      return false
+    }
+  }
+
+  // unary `-` operator
+  static public prefix func - (value: Yaml) -> Yaml {
+    switch value {
+    case .int(let v):
+      return .int(-v)
+    case .double(let v):
+      return .double(-v)
+    default:
+      fatalError("`-` operator may only be used on .int or .double Yaml values")
+    }
+  }
+}
+
+extension Yaml {
+  public enum ResultError: Error {
+    case message(String?)
+  }
+}
+
+extension Yaml: ExpressibleByNilLiteral {
+  public init(nilLiteral: ()) {
+    self = .null
+  }
+}
+
+extension Yaml: ExpressibleByBooleanLiteral {
+  public init(booleanLiteral: BooleanLiteralType) {
+    self = .bool(booleanLiteral)
+  }
+}
+
+extension Yaml: ExpressibleByIntegerLiteral {
+  public init(integerLiteral: IntegerLiteralType) {
+    self = .int(integerLiteral)
+  }
+}
+
+extension Yaml: ExpressibleByFloatLiteral {
+  public init(floatLiteral: FloatLiteralType) {
+    self = .double(floatLiteral)
+  }
+}
+
+extension Yaml: ExpressibleByStringLiteral {
+  public init(stringLiteral: StringLiteralType) {
+    self = .string(stringLiteral)
+  }
+
+  public init(extendedGraphemeClusterLiteral: StringLiteralType) {
+    self = .string(extendedGraphemeClusterLiteral)
+  }
+
+  public init(unicodeScalarLiteral: StringLiteralType) {
+    self = .string(unicodeScalarLiteral)
+  }
+}
+
+extension Yaml: ExpressibleByArrayLiteral {
+  public init(arrayLiteral elements: Yaml...) {
+    self = .array(elements)
+  }
+}
+
+extension Yaml: ExpressibleByDictionaryLiteral {
+  public init(dictionaryLiteral elements: (Yaml, Yaml)...) {
+    var dictionary = [Yaml: Yaml]()
+    for (k, v) in elements {
+      dictionary[k] = v
+    }
+    self = .dictionary(dictionary)
+  }
+}
+
+extension Yaml: CustomStringConvertible {
+  public var description: Swift.String {
+    switch self {
+    case .null:
+      return "Null"
+    case .bool(let b):
+      return "Bool(\(b))"
+    case .int(let i):
+      return "Int(\(i))"
+    case .double(let f):
+      return "Double(\(f))"
+    case .string(let s):
+      return "String(\(s))"
+    case .array(let s):
+      return "Array(\(s))"
+    case .dictionary(let m):
+      return "Dictionary(\(m))"
+    }
+  }
+}
+
+extension Yaml: Hashable {
+  public var hashValue: Swift.Int {
+    return description.hashValue
+  }
+}
+
+
+
+extension Yaml {
+
+  public static func load (_ text: Swift.String) throws -> Yaml {
+    let result = tokenize(text) >>=- Context.parseDoc
+    if let value = result.value { return value } else { throw ResultError.message(result.error) }
+  }
+
+  public static func loadMultiple (_ text: Swift.String) throws -> [Yaml] {
+    let result = tokenize(text) >>=- Context.parseDocs
+    if let value = result.value { return value } else { throw ResultError.message(result.error) }
+
+  }
+
+  public static func debug (_ text: Swift.String) -> Yaml? {
+    let result = tokenize(text)
+      >>- { tokens in print("\n====== Tokens:\n\(tokens)"); return tokens }
+      >>=- Context.parseDoc
+      >>- { value -> Yaml in print("------ Doc:\n\(value)"); return value }
+    if let error = result.error {
+      print("~~~~~~\n\(error)")
+    }
+    return result.value
+  }
+
+  public static func debugMultiple (_ text: Swift.String) -> [Yaml]? {
+    let result = tokenize(text)
+      >>- { tokens in print("\n====== Tokens:\n\(tokens)"); return tokens }
+      >>=- Context.parseDocs
+      >>- { values -> [Yaml] in values.forEach {
+        v in print("------ Doc:\n\(v)")
+        }; return values }
+    if let error = result.error {
+      print("~~~~~~\n\(error)")
+    }
+    return result.value
+  }
+}
+
+extension Yaml {
+  public subscript(index: Swift.Int) -> Yaml {
+    get {
+      assert(index >= 0)
+      switch self {
+      case .array(let array):
+        if array.indices.contains(index) {
+          return array[index]
+        } else {
+          return .null
+        }
+      default:
+        return .null
+      }
+    }
+    set {
+      assert(index >= 0)
+      switch self {
+      case .array(let array):
+        let emptyCount = max(0, index + 1 - array.count)
+        let empty = [Yaml](repeating: .null, count: emptyCount)
+        var new = array
+        new.append(contentsOf: empty)
+        new[index] = newValue
+        self = .array(new)
+      default:
+        var array = [Yaml](repeating: .null, count: index + 1)
+        array[index] = newValue
+        self = .array(array)
+      }
+    }
+  }
+
+  public subscript(key: Yaml) -> Yaml {
+    get {
+      switch self {
+      case .dictionary(let dictionary):
+        return dictionary[key] ?? .null
+      default:
+        return .null
+      }
+    }
+    set {
+      switch self {
+      case .dictionary(let dictionary):
+        var new = dictionary
+        new[key] = newValue
+        self = .dictionary(new)
+      default:
+        var dictionary = [Yaml: Yaml]()
+        dictionary[key] = newValue
+        self = .dictionary(dictionary)
+      }
+    }
+  }
+}
+
+extension Yaml {
+  public var bool: Swift.Bool? {
+    switch self {
+    case .bool(let b):
+      return b
+    default:
+      return nil
+    }
+  }
+
+  public var int: Swift.Int? {
+    switch self {
+    case .int(let i):
+      return i
+    case .double(let f):
+      if Swift.Double(Swift.Int(f)) == f {
+        return Swift.Int(f)
+      } else {
+        return nil
+      }
+    default:
+      return nil
+    }
+  }
+
+  public var double: Swift.Double? {
+    switch self {
+    case .double(let f):
+      return f
+    case .int(let i):
+      return Swift.Double(i)
+    default:
+      return nil
+    }
+  }
+
+  public var string: Swift.String? {
+    switch self {
+    case .string(let s):
+      return s
+    default:
+      return nil
+    }
+  }
+
+  public var array: [Yaml]? {
+    switch self {
+    case .array(let array):
+      return array
+    default:
+      return nil
+    }
+  }
+
+  public var dictionary: [Yaml: Yaml]? {
+    switch self {
+    case .dictionary(let dictionary):
+      return dictionary
+    default:
+      return nil
+    }
+  }
+
+  public var count: Swift.Int? {
+    switch self {
+    case .array(let array):
+      return array.count
+    case .dictionary(let dictionary):
+      return dictionary.count
+    default:
+      return nil
+    }
+  }
+}
+
+internal enum YAMLResult<T> {
+  case error(String)
+  case value(T)
+
+  public var error: String? {
+    switch self {
+    case .error(let e): return e
+    case .value: return nil
+    }
+  }
+
+  public var value: T? {
+    switch self {
+    case .error: return nil
+    case .value(let v): return v
+    }
+  }
+
+  public func map <U> (f: (T) -> U) -> YAMLResult<U> {
+    switch self {
+    case .error(let e): return .error(e)
+    case .value(let v): return .value(f(v))
+    }
+  }
+
+  public func flatMap <U> (f: (T) -> YAMLResult<U>) -> YAMLResult<U> {
+    switch self {
+    case .error(let e): return .error(e)
+    case .value(let v): return f(v)
+    }
+  }
+}
+
+
+precedencegroup Functional {
+  associativity: left
+  higherThan: DefaultPrecedence
+}
+
+infix operator <*>: Functional
+func <*> <T, U> (f: YAMLResult<(T) -> U>, x: YAMLResult<T>) -> YAMLResult<U> {
+  switch (x, f) {
+  case (.error(let e), _): return .error(e)
+  case (.value, .error(let e)): return .error(e)
+  case (.value(let x), .value(let f)): return . value(f(x))
+  }
+}
+
+infix operator <^>: Functional
+func <^> <T, U> (f: (T) -> U, x: YAMLResult<T>) -> YAMLResult<U> {
+  return x.map(f: f)
+}
+
+infix operator >>-: Functional
+func >>- <T, U> (x: YAMLResult<T>, f: (T) -> U) -> YAMLResult<U> {
+  return x.map(f: f)
+}
+
+infix operator >>=-: Functional
+func >>=- <T, U> (x: YAMLResult<T>, f: (T) -> YAMLResult<U>) -> YAMLResult<U> {
+  return x.flatMap(f: f)
+}
+
+infix operator >>|: Functional
+func >>| <T, U> (x: YAMLResult<T>, y: YAMLResult<U>) -> YAMLResult<U> {
+  return x.flatMap { _ in y }
+}
+
+extension Yaml  {
+  static func lift <V> (_ v: V) -> YAMLResult<V> {
+    return .value(v)
+  }
+
+  static func fail <T> (_ e: String) -> YAMLResult<T> {
+    return .error(e)
+  }
+
+  static func join <T> (_ x: YAMLResult<YAMLResult<T>>) -> YAMLResult<T> {
+    return x >>=- { i in i }
+  }
+
+  static func `guard` (_ error: @autoclosure() -> String, check: Bool) -> YAMLResult<()> {
+    return check ? lift(()) : .error(error())
+  }
+
+}
+
+import Foundation
+
+private let invalidOptionsPattern =
+  try! NSRegularExpression(pattern: "[^ixsm]", options: [])
+
+private let regexOptions: [Character: NSRegularExpression.Options] = [
+  "i": .caseInsensitive,
+  "x": .allowCommentsAndWhitespace,
+  "s": .dotMatchesLineSeparators,
+  "m": .anchorsMatchLines
+]
+
+extension Yaml {
+  struct Regex {
+    static func matchRange (_ string: String, regex: NSRegularExpression) -> NSRange {
+      let sr = NSMakeRange(0, string.utf16.count)
+      return regex.rangeOfFirstMatch(in: string, options: [], range: sr)
+    }
+
+    static func matches (_ string: String, regex: NSRegularExpression) -> Bool {
+      return matchRange(string, regex: regex).location != NSNotFound
+    }
+
+    static func regex (_ pattern: String, options: String = "") -> NSRegularExpression! {
+      if matches(options, regex: invalidOptionsPattern) {
+        return nil
+      }
+
+      let opts = options.characters.reduce(NSRegularExpression.Options()) {
+        (acc, opt) -> NSRegularExpression.Options in
+        return NSRegularExpression.Options(rawValue:acc.rawValue | (regexOptions[opt]
+               ?? NSRegularExpression.Options()).rawValue)
+      }
+      return try? NSRegularExpression(pattern: pattern, options: opts)
+    }
+
+
+
+
+
+    static func replace (_ regex: NSRegularExpression, template: String) -> (String)
+      -> String {
+        return { string in
+          let s = NSMutableString(string: string)
+          let range = NSMakeRange(0, string.utf16.count)
+          _ = regex.replaceMatches(in: s, options: [], range: range,
+                                   withTemplate: template)
+          #if os(Linux)
+            return s._bridgeToSwift()
+          #else
+            return s as String
+          #endif
+        }
+    }
+
+    static func replace (_ regex: NSRegularExpression, block: @escaping ([String]) -> String)
+      -> (String) -> String {
+        return { string in
+          let s = NSMutableString(string: string)
+          let range = NSMakeRange(0, string.utf16.count)
+          var offset = 0
+          regex.enumerateMatches(in: string, options: [], range: range) {
+            result, _, _ in
+            if let result = result {
+              var captures = [String](repeating: "", count: result.numberOfRanges)
+              for i in 0..<result.numberOfRanges {
+                #if os(Linux)
+                  let rangeAt = result.range(at: i)
+                #else
+                  let rangeAt = result.rangeAt(i)
+                #endif
+                if let r = rangeAt.toRange() {
+                  captures[i] = NSString(string: string).substring(with: NSRange(r))
+                }
+              }
+              let replacement = block(captures)
+              let offR = NSMakeRange(result.range.location + offset, result.range.length)
+              offset += replacement.characters.count - result.range.length
+              s.replaceCharacters(in: offR, with: replacement)
+            }
+          }
+          #if os(Linux)
+            return s._bridgeToSwift()
+          #else
+            return s as String
+          #endif
+        }
+    }
+
+    static func splitLead (_ regex: NSRegularExpression) -> (String)
+      -> (String, String) {
+        return { string in
+          let r = matchRange(string, regex: regex)
+          if r.location == NSNotFound {
+            return ("", string)
+          } else {
+            let s = NSString(string: string)
+            let i = r.location + r.length
+            return (s.substring(to: i), s.substring(from: i))
+          }
+        }
+    }
+
+    static func splitTrail (_ regex: NSRegularExpression) -> (String)
+      -> (String, String) {
+        return { string in
+          let r = matchRange(string, regex: regex)
+          if r.location == NSNotFound {
+            return (string, "")
+          } else {
+            let s = NSString(string: string)
+            let i = r.location
+            return (s.substring(to: i), s.substring(from: i))
+          }
+        }
+    }
+
+    static func substringWithRange (_ range: NSRange) -> (String) -> String {
+      return { string in
+        return NSString(string: string).substring(with: range)
+      }
+    }
+    
+    static func substringFromIndex (_ index: Int) -> (String) -> String {
+      return { string in
+        return NSString(string: string).substring(from: index)
+      }
+    }
+  }
+  
+}
+
+import Foundation
+
+private typealias Resulter = Yaml
+
+
+extension Yaml {
+
+  struct Context {
+    let tokens: [Yaml.TokenMatch]
+    let aliases: [String: Yaml]
+
+    init (_ tokens: [Yaml.TokenMatch], _ aliases: [String: Yaml] = [:]) {
+      self.tokens = tokens
+      self.aliases = aliases
+    }
+    static func parseDoc (_ tokens: [Yaml.TokenMatch]) -> YAMLResult<Yaml> {
+      let c = Resulter.lift(Context(tokens))
+      let cv = c >>=- parseHeader >>=- parse
+      let v = cv >>- getValue
+      return cv
+        >>- getContext
+        >>- ignoreDocEnd
+        >>=- expect(Yaml.TokenType.end, message: "expected end")
+        >>| v
+    }
+
+    static func parseDocs (_ tokens: [Yaml.TokenMatch]) -> YAMLResult<[Yaml]> {
+      return parseDocs([])(Context(tokens))
+    }
+
+    static func parseDocs (_ acc: [Yaml]) -> (Context) -> YAMLResult<[Yaml]> {
+      return { context in
+        if peekType(context) == .end {
+          return Resulter.lift(acc)
+        }
+        let cv = Resulter.lift(context)
+          >>=- parseHeader
+          >>=- parse
+        let v = cv
+          >>- getValue
+        let c = cv
+          >>- getContext
+          >>- ignoreDocEnd
+        let a = appendToArray(acc) <^> v
+        return parseDocs <^> a <*> c |> Resulter.join
+      }
+    }
+
+    static func error (_ message: String) -> (Context) -> String {
+      return { context in
+        let text = recreateText("", context: context) |> Yaml.escapeErrorContext
+        return "\(message), \(text)"
+      }
+    }
+
+
+
+  }
+
+}
+
+private typealias Context = Yaml.Context
+
+private var error = Yaml.Context.error
+
+private typealias ContextValue = (context: Context, value: Yaml)
+
+private func createContextValue (_ context: Context) -> (Yaml) -> ContextValue {
   return { value in (context, value) }
 }
-func getContext (cv: ContextValue) -> Context {
+
+private func getContext (_ cv: ContextValue) -> Context {
   return cv.context
 }
-func getValue (cv: ContextValue) -> Yaml {
+
+private func getValue (_ cv: ContextValue) -> Yaml {
   return cv.value
 }
 
-func parseDoc (tokens: [TokenMatch]) -> Result<Yaml> {
-  let c = lift(Context(tokens))
-  let cv = c >>=- parseHeader >>=- parse
-  let v = cv >>- getValue
-  return cv
-    >>- getContext
-    >>- ignoreDocEnd
-    >>=- expect(TokenType.End, message: "expected end")
-    >>| v
-}
 
-func parseDocs (tokens: [TokenMatch]) -> Result<[Yaml]> {
-  return parseDocs([])(Context(tokens))
-}
-
-func parseDocs (acc: [Yaml]) -> Context -> Result<[Yaml]> {
-  return { context in
-    if peekType(context) == .End {
-      return lift(acc)
-    }
-    let cv = lift(context)
-      >>=- parseHeader
-      >>=- parse
-    let v = cv
-      >>- getValue
-    let c = cv
-      >>- getContext
-      >>- ignoreDocEnd
-    let a = appendToArray(acc) <^> v
-    return parseDocs <^> a <*> c |> join
-  }
-}
-
-func peekType (context: Context) -> TokenType {
+private func peekType (_ context: Context) -> Yaml.TokenType {
   return context.tokens[0].type
 }
 
-func peekMatch (context: Context) -> String {
+
+private func peekMatch (_ context: Context) -> String {
   return context.tokens[0].match
 }
 
-func advance (context: Context) -> Context {
+
+private func advance (_ context: Context) -> Context {
   var tokens = context.tokens
-  tokens.removeAtIndex(0)
+  tokens.remove(at: 0)
   return Context(tokens, context.aliases)
 }
 
-func ignoreSpace (context: Context) -> Context {
-  if ![.Comment, .Space, .NewLine].contains(peekType(context)) {
+private func ignoreSpace (_ context: Context) -> Context {
+  if ![.comment, .space, .newLine].contains(peekType(context)) {
     return context
   }
   return ignoreSpace(advance(context))
 }
 
-func ignoreDocEnd (context: Context) -> Context {
-  if ![.Comment, .Space, .NewLine, .DocEnd].contains(peekType(context)) {
+private func ignoreDocEnd (_ context: Context) -> Context {
+  if ![.comment, .space, .newLine, .docend].contains(peekType(context)) {
     return context
   }
   return ignoreDocEnd(advance(context))
 }
 
-func expect (type: TokenType, message: String) -> Context -> Result<Context> {
+private func expect (_ type: Yaml.TokenType, message: String) -> (Context) -> YAMLResult<Context> {
   return { context in
     let check = peekType(context) == type
-    return `guard`(error(message)(context), check: check)
-      >>| lift(advance(context))
+    return Resulter.`guard`(error(message)(context), check: check)
+      >>| Resulter.lift(advance(context))
   }
 }
 
-func expectVersion (context: Context) -> Result<Context> {
+private func expectVersion (_ context: Context) -> YAMLResult<Context> {
   let version = peekMatch(context)
   let check = ["1.1", "1.2"].contains(version)
-  return `guard`(error("invalid yaml version")(context), check: check)
-    >>| lift(advance(context))
+  return Resulter.`guard`(error("invalid yaml version")(context), check: check)
+    >>| Resulter.lift(advance(context))
 }
 
-func error (message: String) -> Context -> String {
-  return { context in
-    let text = recreateText("", context: context) |> escapeErrorContext
-    return "\(message), \(text)"
-  }
-}
 
-func recreateText (string: String, context: Context) -> String {
-  if string.characters.count >= 50 || peekType(context) == .End {
+private func recreateText (_ string: String, context: Context) -> String {
+  if string.characters.count >= 50 || peekType(context) == .end {
     return string
   }
   return recreateText(string + peekMatch(context), context: advance(context))
 }
 
-func parseHeader (context: Context) -> Result<Context> {
+private func parseHeader (_ context: Context) -> YAMLResult<Context> {
   return parseHeader(true)(Context(context.tokens, [:]))
 }
 
-func parseHeader (yamlAllowed: Bool) -> Context -> Result<Context> {
+private func parseHeader (_ yamlAllowed: Bool) -> (Context) -> YAMLResult<Context> {
   return { context in
     switch peekType(context) {
 
-    case .Comment, .Space, .NewLine:
-      return lift(context)
+    case .comment, .space, .newLine:
+      return Resulter.lift(context)
         >>- advance
         >>=- parseHeader(yamlAllowed)
 
-    case .YamlDirective:
+    case .yamlDirective:
       let err = "duplicate yaml directive"
-      return `guard`(error(err)(context), check: yamlAllowed)
-        >>| lift(context)
+      return Resulter.`guard`(error(err)(context), check: yamlAllowed)
+        >>| Resulter.lift(context)
         >>- advance
-        >>=- expect(TokenType.Space, message: "expected space")
+        >>=- expect(Yaml.TokenType.space, message: "expected space")
         >>=- expectVersion
         >>=- parseHeader(false)
 
-    case .DocStart:
-      return lift(advance(context))
+    case .docStart:
+      return Resulter.lift(advance(context))
 
     default:
-      return `guard`(error("expected ---")(context), check: yamlAllowed)
-        >>| lift(context)
+      return Resulter.`guard`(error("expected ---")(context), check: yamlAllowed)
+        >>| Resulter.lift(context)
     }
   }
 }
 
-func parse (context: Context) -> Result<ContextValue> {
+private func parse (_ context: Context) -> YAMLResult<ContextValue> {
   switch peekType(context) {
 
-  case .Comment, .Space, .NewLine:
+  case .comment, .space, .newLine:
     return parse(ignoreSpace(context))
 
-  case .Null:
-    return lift((advance(context), nil))
+  case .null:
+    return Resulter.lift((advance(context), nil))
 
-  case .True:
-    return lift((advance(context), true))
+  case ._true:
+    return Resulter.lift((advance(context), true))
 
-  case .False:
-    return lift((advance(context), false))
+  case ._false:
+    return Resulter.lift((advance(context), false))
 
-  case .Int:
+  case .int:
     let m = peekMatch(context)
     // will throw runtime error if overflows
-    let v = Yaml.Int(parseInt(m, radix: 10))
-    return lift((advance(context), v))
+    let v = Yaml.int(parseInt(m, radix: 10))
+    return Resulter.lift((advance(context), v))
 
-  case .IntOct:
-    let m = peekMatch(context) |> replace(regex("0o"), template: "")
+  case .intOct:
+    let m = peekMatch(context) |> Yaml.Regex.replace(Yaml.Regex.regex("0o"), template: "")
     // will throw runtime error if overflows
-    let v = Yaml.Int(parseInt(m, radix: 8))
-    return lift((advance(context), v))
+    let v = Yaml.int(parseInt(m, radix: 8))
+    return Resulter.lift((advance(context), v))
 
-  case .IntHex:
-    let m = peekMatch(context) |> replace(regex("0x"), template: "")
+  case .intHex:
+    let m = peekMatch(context) |> Yaml.Regex.replace(Yaml.Regex.regex("0x"), template: "")
     // will throw runtime error if overflows
-    let v = Yaml.Int(parseInt(m, radix: 16))
-    return lift((advance(context), v))
+    let v = Yaml.int(parseInt(m, radix: 16))
+    return Resulter.lift((advance(context), v))
 
-  case .IntSex:
+  case .intSex:
     let m = peekMatch(context)
-    let v = Yaml.Int(parseInt(m, radix: 60))
-    return lift((advance(context), v))
+    let v = Yaml.int(parseInt(m, radix: 60))
+    return Resulter.lift((advance(context), v))
 
-  case .InfinityP:
-    return lift((advance(context), .Double(Double.infinity)))
+  case .infinityP:
+    return Resulter.lift((advance(context), .double(Double.infinity)))
 
-  case .InfinityN:
-    return lift((advance(context), .Double(-Double.infinity)))
+  case .infinityN:
+    return Resulter.lift((advance(context), .double(-Double.infinity)))
 
-  case .NaN:
-    return lift((advance(context), .Double(Double.NaN)))
+  case .nan:
+    return Resulter.lift((advance(context), .double(Double.nan)))
 
-  case .Double:
-    let m = peekMatch(context) as NSString
-    return lift((advance(context), .Double(m.doubleValue)))
+  case .double:
+    let m = NSString(string: peekMatch(context))
+    return Resulter.lift((advance(context), .double(m.doubleValue)))
 
-  case .Dash:
+  case .dash:
     return parseBlockSeq(context)
 
-  case .OpenSB:
+  case .openSB:
     return parseFlowSeq(context)
 
-  case .OpenCB:
+  case .openCB:
     return parseFlowMap(context)
 
-  case .QuestionMark:
+  case .questionMark:
     return parseBlockMap(context)
 
-  case .StringDQ, .StringSQ, .String:
+  case .stringDQ, .stringSQ, .string:
     return parseBlockMapOrString(context)
 
-  case .Literal:
-    return parseLiteral(context)
+  case .literal:
+    return parseliteral(context)
 
-  case .Folded:
-    let cv = parseLiteral(context)
+  case .folded:
+    let cv = parseliteral(context)
     let c = cv >>- getContext
     let v = cv
       >>- getValue
-      >>- { value in Yaml.String(foldBlock(value.string ?? "")) }
+      >>- { value in Yaml.string(foldBlock(value.string ?? "")) }
     return createContextValue <^> c <*> v
 
-  case .Indent:
+  case .indent:
     let cv = parse(advance(context))
     let v = cv >>- getValue
     let c = cv
       >>- getContext
       >>- ignoreSpace
-      >>=- expect(TokenType.Dedent, message: "expected dedent")
+      >>=- expect(Yaml.TokenType.dedent, message: "expected dedent")
     return createContextValue <^> c <*> v
 
-  case .Anchor:
+  case .anchor:
     let m = peekMatch(context)
-    let name = m.substringFromIndex(m.startIndex.successor())
+    let name = m.substring(from: m.index(after: m.startIndex))
     let cv = parse(advance(context))
     let v = cv >>- getValue
     let c = addAlias(name) <^> v <*> (cv >>- getContext)
     return createContextValue <^> c <*> v
 
-  case .Alias:
+  case .alias:
     let m = peekMatch(context)
-    let name = m.substringFromIndex(m.startIndex.successor())
+    let name = m.substring(from: m.index(after: m.startIndex))
     let value = context.aliases[name]
     let err = "unknown alias \(name)"
-    return `guard`(error(err)(context), check: value != nil)
-      >>| lift((advance(context), value ?? nil))
+    return Resulter.`guard`(error(err)(context), check: value != nil)
+      >>| Resulter.lift((advance(context), value ?? nil))
 
-  case .End, .Dedent:
-    return lift((context, nil))
+  case .end, .dedent:
+    return Resulter.lift((context, nil))
 
   default:
-    return fail(error("unexpected type \(peekType(context))")(context))
+    return Resulter.fail(error("unexpected type \(peekType(context))")(context))
 
   }
 }
 
-func addAlias (name: String) -> Yaml -> Context -> Context {
+private func addAlias (_ name: String) -> (Yaml) -> (Context) -> Context {
   return { value in
     return { context in
       var aliases = context.aliases
@@ -284,13 +1092,13 @@ func addAlias (name: String) -> Yaml -> Context -> Context {
   }
 }
 
-func appendToArray (array: [Yaml]) -> Yaml -> [Yaml] {
+private func appendToArray (_ array: [Yaml]) -> (Yaml) -> [Yaml] {
   return { value in
     return array + [value]
   }
 }
 
-func putToMap (map: [Yaml: Yaml]) -> Yaml -> Yaml -> [Yaml: Yaml] {
+private func putToMap (_ map: [Yaml: Yaml]) -> (Yaml) -> (Yaml) -> [Yaml: Yaml] {
   return { key in
     return { value in
       var map = map
@@ -300,29 +1108,29 @@ func putToMap (map: [Yaml: Yaml]) -> Yaml -> Yaml -> [Yaml: Yaml] {
   }
 }
 
-func checkKeyUniqueness (acc: [Yaml: Yaml]) -> (context: Context, key: Yaml)
-  -> Result<ContextValue> {
+private func checkKeyUniqueness (_ acc: [Yaml: Yaml]) -> (_ context: Context, _ key: Yaml)
+  -> YAMLResult<ContextValue> {
     return { (context, key) in
       let err = "duplicate key \(key)"
-      return `guard`(error(err)(context), check: !acc.keys.contains(key))
-        >>| lift((context, key))
+      return Resulter.`guard`(error(err)(context), check: !acc.keys.contains(key))
+        >>| Resulter.lift((context, key))
     }
 }
 
-func parseFlowSeq (context: Context) -> Result<ContextValue> {
-  return lift(context)
-    >>=- expect(TokenType.OpenSB, message: "expected [")
+private func parseFlowSeq (_ context: Context) -> YAMLResult<ContextValue> {
+  return Resulter.lift(context)
+    >>=- expect(Yaml.TokenType.openSB, message: "expected [")
     >>=- parseFlowSeq([])
 }
 
-func parseFlowSeq (acc: [Yaml]) -> Context -> Result<ContextValue> {
+private func parseFlowSeq (_ acc: [Yaml]) -> (Context) -> YAMLResult<ContextValue> {
   return { context in
-    if peekType(context) == .CloseSB {
-      return lift((advance(context), .Array(acc)))
+    if peekType(context) == .closeSB {
+      return Resulter.lift((advance(context), .array(acc)))
     }
-    let cv = lift(context)
+    let cv = Resulter.lift(context)
       >>- ignoreSpace
-      >>=- (acc.count == 0 ? lift : expect(TokenType.Comma, message: "expected comma"))
+      >>=- (acc.count == 0 ? Resulter.lift : expect(Yaml.TokenType.comma, message: "expected comma"))
       >>- ignoreSpace
       >>=- parse
     let v = cv >>- getValue
@@ -330,90 +1138,92 @@ func parseFlowSeq (acc: [Yaml]) -> Context -> Result<ContextValue> {
       >>- getContext
       >>- ignoreSpace
     let a = appendToArray(acc) <^> v
-    return parseFlowSeq <^> a <*> c |> join
+    return parseFlowSeq <^> a <*> c |> Resulter.join
   }
 }
 
-func parseFlowMap (context: Context) -> Result<ContextValue> {
-  return lift(context)
-    >>=- expect(TokenType.OpenCB, message: "expected {")
+
+private func parseFlowMap (_ context: Context) -> YAMLResult<ContextValue> {
+  return Resulter.lift(context)
+    >>=- expect(Yaml.TokenType.openCB, message: "expected {")
     >>=- parseFlowMap([:])
 }
 
-func parseFlowMap (acc: [Yaml: Yaml]) -> Context -> Result<ContextValue> {
+private func parseFlowMap (_ acc: [Yaml: Yaml]) -> (Context) -> YAMLResult<ContextValue> {
   return { context in
-    if peekType(context) == .CloseCB {
-      return lift((advance(context), .Dictionary(acc)))
+    if peekType(context) == .closeCB {
+      return Resulter.lift((advance(context), .dictionary(acc)))
     }
-    let ck = lift(context)
+    let ck = Resulter.lift(context)
       >>- ignoreSpace
-      >>=- (acc.count == 0 ? lift : expect(TokenType.Comma, message: "expected comma"))
+      >>=- (acc.count == 0 ? Resulter.lift : expect(Yaml.TokenType.comma, message: "expected comma"))
       >>- ignoreSpace
       >>=- parseString
       >>=- checkKeyUniqueness(acc)
     let k = ck >>- getValue
     let cv = ck
       >>- getContext
-      >>=- expect(TokenType.Colon, message: "expected colon")
+      >>=- expect(Yaml.TokenType.colon, message: "expected colon")
       >>=- parse
     let v = cv >>- getValue
     let c = cv
       >>- getContext
       >>- ignoreSpace
     let a = putToMap(acc) <^> k <*> v
-    return parseFlowMap <^> a <*> c |> join
+    return parseFlowMap <^> a <*> c |> Resulter.join
   }
 }
 
-func parseBlockSeq (context: Context) -> Result<ContextValue> {
+private func parseBlockSeq (_ context: Context) -> YAMLResult<ContextValue> {
   return parseBlockSeq([])(context)
 }
 
-func parseBlockSeq (acc: [Yaml]) -> Context -> Result<ContextValue> {
+private func parseBlockSeq (_ acc: [Yaml]) -> (Context) -> YAMLResult<ContextValue> {
   return { context in
-    if peekType(context) != .Dash {
-      return lift((context, .Array(acc)))
+    if peekType(context) != .dash {
+      return Resulter.lift((context, .array(acc)))
     }
-    let cv = lift(context)
+    let cv = Resulter.lift(context)
       >>- advance
-      >>=- expect(TokenType.Indent, message: "expected indent after dash")
+      >>=- expect(Yaml.TokenType.indent, message: "expected indent after dash")
       >>- ignoreSpace
       >>=- parse
     let v = cv >>- getValue
     let c = cv
       >>- getContext
       >>- ignoreSpace
-      >>=- expect(TokenType.Dedent, message: "expected dedent after dash indent")
+      >>=- expect(Yaml.TokenType.dedent, message: "expected dedent after dash indent")
       >>- ignoreSpace
     let a = appendToArray(acc) <^> v
-    return parseBlockSeq <^> a <*> c |> join
+    return parseBlockSeq <^> a <*> c |> Resulter.join
   }
 }
 
-func parseBlockMap (context: Context) -> Result<ContextValue> {
+private func parseBlockMap (_ context: Context) -> YAMLResult<ContextValue> {
   return parseBlockMap([:])(context)
 }
 
-func parseBlockMap (acc: [Yaml: Yaml]) -> Context -> Result<ContextValue> {
+private func parseBlockMap (_ acc: [Yaml: Yaml]) -> (Context) -> YAMLResult<ContextValue> {
   return { context in
     switch peekType(context) {
 
-    case .QuestionMark:
-      return parseQuestionMarkKeyValue(acc)(context)
+    case .questionMark:
+      return parseQuestionMarkkeyValue(acc)(context)
 
-    case .String, .StringDQ, .StringSQ:
+    case .string, .stringDQ, .stringSQ:
       return parseStringKeyValue(acc)(context)
 
     default:
-      return lift((context, .Dictionary(acc)))
+      return Resulter.lift((context, .dictionary(acc)))
     }
   }
 }
 
-func parseQuestionMarkKeyValue (acc: [Yaml: Yaml]) -> Context -> Result<ContextValue> {
+private func parseQuestionMarkkeyValue (_ acc: [Yaml: Yaml]) -> (Context)
+    -> YAMLResult<ContextValue> {
   return { context in
-    let ck = lift(context)
-      >>=- expect(TokenType.QuestionMark, message: "expected ?")
+    let ck = Resulter.lift(context)
+      >>=- expect(Yaml.TokenType.questionMark, message: "expected ?")
       >>=- parse
       >>=- checkKeyUniqueness(acc)
     let k = ck >>- getValue
@@ -426,27 +1236,27 @@ func parseQuestionMarkKeyValue (acc: [Yaml: Yaml]) -> Context -> Result<ContextV
       >>- getContext
       >>- ignoreSpace
     let a = putToMap(acc) <^> k <*> v
-    return parseBlockMap <^> a <*> c |> join
+    return parseBlockMap <^> a <*> c |> Resulter.join
   }
 }
 
-func parseColonValueOrNil (context: Context) -> Result<ContextValue> {
-  if peekType(context) != .Colon {
-    return lift((context, nil))
+private func parseColonValueOrNil (_ context: Context) -> YAMLResult<ContextValue> {
+  if peekType(context) != .colon {
+    return Resulter.lift((context, nil))
   }
   return parseColonValue(context)
 }
 
-func parseColonValue (context: Context) -> Result<ContextValue> {
-  return lift(context)
-    >>=- expect(TokenType.Colon, message: "expected colon")
+private func parseColonValue (_ context: Context) -> YAMLResult<ContextValue> {
+  return Resulter.lift(context)
+    >>=- expect(Yaml.TokenType.colon, message: "expected colon")
     >>- ignoreSpace
     >>=- parse
 }
 
-func parseStringKeyValue (acc: [Yaml: Yaml]) -> Context -> Result<ContextValue> {
+private func parseStringKeyValue (_ acc: [Yaml: Yaml]) -> (Context) -> YAMLResult<ContextValue> {
   return { context in
-    let ck = lift(context)
+    let ck = Resulter.lift(context)
       >>=- parseString
       >>=- checkKeyUniqueness(acc)
     let k = ck >>- getValue
@@ -459,152 +1269,161 @@ func parseStringKeyValue (acc: [Yaml: Yaml]) -> Context -> Result<ContextValue> 
       >>- getContext
       >>- ignoreSpace
     let a = putToMap(acc) <^> k <*> v
-    return parseBlockMap <^> a <*> c |> join
+    return parseBlockMap <^> a <*> c |> Resulter.join
   }
 }
 
-func parseString (context: Context) -> Result<ContextValue> {
+private func parseString (_ context: Context) -> YAMLResult<ContextValue> {
   switch peekType(context) {
 
-  case .String:
+  case .string:
     let m = normalizeBreaks(peekMatch(context))
-    let folded = m |> replace(regex("^[ \\t\\n]+|[ \\t\\n]+$"), template: "") |> foldFlow
-    return lift((advance(context), .String(folded)))
+    let folded = m |> Yaml.Regex.replace(Yaml.Regex.regex("^[ \\t\\n]+|[ \\t\\n]+$"), template: "")
+        |> foldFlow
+    return Resulter.lift((advance(context), .string(folded)))
 
-  case .StringDQ:
+  case .stringDQ:
     let m = unwrapQuotedString(normalizeBreaks(peekMatch(context)))
-    return lift((advance(context), .String(unescapeDoubleQuotes(foldFlow(m)))))
+    return Resulter.lift((advance(context), .string(unescapeDoubleQuotes(foldFlow(m)))))
 
-  case .StringSQ:
+  case .stringSQ:
     let m = unwrapQuotedString(normalizeBreaks(peekMatch(context)))
-    return lift((advance(context), .String(unescapeSingleQuotes(foldFlow(m)))))
+    return Resulter.lift((advance(context), .string(unescapeSingleQuotes(foldFlow(m)))))
 
   default:
-    return fail(error("expected string")(context))
+    return Resulter.fail(error("expected string")(context))
   }
 }
 
-func parseBlockMapOrString (context: Context) -> Result<ContextValue> {
+
+private func parseBlockMapOrString (_ context: Context) -> YAMLResult<ContextValue> {
   let match = peekMatch(context)
   // should spaces before colon be ignored?
-  return context.tokens[1].type != .Colon || matches(match, regex: regex("\n"))
+  return context.tokens[1].type != .colon || Yaml.Regex.matches(match, regex: Yaml.Regex.regex("\n"))
     ? parseString(context)
     : parseBlockMap(context)
 }
 
-func foldBlock (block: String) -> String {
-  let (body, trail) = block |> splitTrail(regex("\\n*$"))
+private func foldBlock (_ block: String) -> String {
+  let (body, trail) = block |> Yaml.Regex.splitTrail(Yaml.Regex.regex("\\n*$"))
   return (body
-    |> replace(regex("^([^ \\t\\n].*)\\n(?=[^ \\t\\n])", options: "m"), template: "$1 ")
-    |> replace(
-      regex("^([^ \\t\\n].*)\\n(\\n+)(?![ \\t])", options: "m"), template: "$1$2")
+    |> Yaml.Regex.replace(Yaml.Regex.regex("^([^ \\t\\n].*)\\n(?=[^ \\t\\n])", options: "m"),
+                          template: "$1 ")
+    |> Yaml.Regex.replace(
+      Yaml.Regex.regex("^([^ \\t\\n].*)\\n(\\n+)(?![ \\t])", options: "m"), template: "$1$2")
     ) + trail
 }
 
-func foldFlow (flow: String) -> String {
-  let (lead, rest) = flow |> splitLead(regex("^[ \\t]+"))
-  let (body, trail) = rest |> splitTrail(regex("[ \\t]+$"))
+private func foldFlow (_ flow: String) -> String {
+  let (lead, rest) = flow |> Yaml.Regex.splitLead(Yaml.Regex.regex("^[ \\t]+"))
+  let (body, trail) = rest |> Yaml.Regex.splitTrail(Yaml.Regex.regex("[ \\t]+$"))
   let folded = body
-    |> replace(regex("^[ \\t]+|[ \\t]+$|\\\\\\n", options: "m"), template: "")
-    |> replace(regex("(^|.)\\n(?=.|$)"), template: "$1 ")
-    |> replace(regex("(.)\\n(\\n+)"), template: "$1$2")
+    |> Yaml.Regex.replace(Yaml.Regex.regex("^[ \\t]+|[ \\t]+$|\\\\\\n", options: "m"), template: "")
+    |> Yaml.Regex.replace(Yaml.Regex.regex("(^|.)\\n(?=.|$)"), template: "$1 ")
+    |> Yaml.Regex.replace(Yaml.Regex.regex("(.)\\n(\\n+)"), template: "$1$2")
   return lead + folded + trail
 }
 
-func parseLiteral (context: Context) -> Result<ContextValue> {
+private func count(string: String) -> String.IndexDistance {
+  return string.characters.count
+}
+
+private func parseliteral (_ context: Context) -> YAMLResult<ContextValue> {
   let literal = peekMatch(context)
   let blockContext = advance(context)
   let chomps = ["-": -1, "+": 1]
-  let chomp = chomps[literal |> replace(regex("[^-+]"), template: "")] ?? 0
-  let indent = parseInt(literal |> replace(regex("[^1-9]"), template: ""), radix: 10)
-  let headerPattern = regex("^(\\||>)([1-9][-+]|[-+]?[1-9]?)( |$)")
+  let chomp = chomps[literal |> Yaml.Regex.replace(Yaml.Regex.regex("[^-+]"), template: "")] ?? 0
+  let indent = parseInt(literal |> Yaml.Regex.replace(Yaml.Regex.regex("[^1-9]"), template: ""),
+                        radix: 10)
+  let headerPattern = Yaml.Regex.regex("^(\\||>)([1-9][-+]|[-+]?[1-9]?)( |$)")
   let error0 = "invalid chomp or indent header"
-  let c = `guard`(error(error0)(context),
-                  check: matches(literal, regex: headerPattern))
-    >>| lift(blockContext)
-    >>=- expect(TokenType.String, message: "expected scalar block")
+  let c = Resulter.`guard`(error(error0)(context),
+                           check: Yaml.Regex.matches(literal, regex: headerPattern!))
+    >>| Resulter.lift(blockContext)
+    >>=- expect(Yaml.TokenType.string, message: "expected scalar block")
   let block = peekMatch(blockContext)
     |> normalizeBreaks
   let (lead, _) = block
-    |> splitLead(regex("^( *\\n)* {1,}(?! |\\n|$)"))
-  let foundIndent = lead
-    |> replace(regex("^( *\\n)*"), template: "")
+    |> Yaml.Regex.splitLead(Yaml.Regex.regex("^( *\\n)* {1,}(?! |\\n|$)"))
+  let foundindent = lead
+    |> Yaml.Regex.replace(Yaml.Regex.regex("^( *\\n)*"), template: "")
     |> count
-  let effectiveIndent = indent > 0 ? indent : foundIndent
+  let effectiveindent = indent > 0 ? indent : foundindent
   let invalidPattern =
-    regex("^( {0,\(effectiveIndent)}\\n)* {\(effectiveIndent + 1),}\\n")
-  let check1 = matches(block, regex: invalidPattern)
-  let check2 = indent > 0 && foundIndent < indent
+    Yaml.Regex.regex("^( {0,\(effectiveindent)}\\n)* {\(effectiveindent + 1),}\\n")
+  let check1 = Yaml.Regex.matches(block, regex: invalidPattern!)
+  let check2 = indent > 0 && foundindent < indent
   let trimmed = block
-    |> replace(regex("^ {0,\(effectiveIndent)}"), template: "")
-    |> replace(regex("\\n {0,\(effectiveIndent)}"), template: "\n")
+    |> Yaml.Regex.replace(Yaml.Regex.regex("^ {0,\(effectiveindent)}"), template: "")
+    |> Yaml.Regex.replace(Yaml.Regex.regex("\\n {0,\(effectiveindent)}"), template: "\n")
     |> (chomp == -1
-      ? replace(regex("(\\n *)*$"), template: "")
+      ? Yaml.Regex.replace(Yaml.Regex.regex("(\\n *)*$"), template: "")
       : chomp == 0
-      ? replace(regex("(?=[^ ])(\\n *)*$"), template: "\n")
+      ? Yaml.Regex.replace(Yaml.Regex.regex("(?=[^ ])(\\n *)*$"), template: "\n")
       : { s in s }
   )
   let error1 = "leading all-space line must not have too many spaces"
   let error2 = "less indented block scalar than the indicated level"
   return c
-    >>| `guard`(error(error1)(blockContext), check: !check1)
-    >>| `guard`(error(error2)(blockContext), check: !check2)
+    >>| Resulter.`guard`(error(error1)(blockContext), check: !check1)
+    >>| Resulter.`guard`(error(error2)(blockContext), check: !check2)
     >>| c
-    >>- { context in (context, .String(trimmed))}
+    >>- { context in (context, .string(trimmed))}
 }
 
-func parseInt (string: String, radix: Int) -> Int {
-  let (sign, str) = splitLead(regex("^[-+]"))(string)
+
+private func parseInt (_ string: String, radix: Int) -> Int {
+  let (sign, str) = Yaml.Regex.splitLead(Yaml.Regex.regex("^[-+]"))(string)
   let multiplier = (sign == "-" ? -1 : 1)
   let ints = radix == 60
-    ? toSexInts(str)
-    : toInts(str)
-  return multiplier * ints.reduce(0, combine: { acc, i in acc * radix + i })
+    ? toSexints(str)
+    : toints(str)
+  return multiplier * ints.reduce(0, { acc, i in acc * radix + i })
 }
 
-func toSexInts (string: String) -> [Int] {
-  return string.componentsSeparatedByString(":").map {
+private func toSexints (_ string: String) -> [Int] {
+  return string.components(separatedBy: ":").map {
     c in Int(c) ?? 0
   }
 }
 
-func toInts (string: String) -> [Int] {
+private func toints (_ string: String) -> [Int] {
   return string.unicodeScalars.map {
     c in
     switch c {
-    case "0"..."9": return Int(c.value) - Int(UnicodeScalar("0").value)
-    case "a"..."z": return Int(c.value) - Int(UnicodeScalar("a").value) + 10
-    case "A"..."Z": return Int(c.value) - Int(UnicodeScalar("A").value) + 10
+    case "0"..."9": return Int(c.value) - Int(("0" as UnicodeScalar).value)
+    case "a"..."z": return Int(c.value) - Int(("a" as UnicodeScalar).value) + 10
+    case "A"..."Z": return Int(c.value) - Int(("A" as UnicodeScalar).value) + 10
     default: fatalError("invalid digit \(c)")
     }
   }
 }
 
-func normalizeBreaks (s: String) -> String {
-  return replace(regex("\\r\\n|\\r"), template: "\n")(s)
+private func normalizeBreaks (_ s: String) -> String {
+  return Yaml.Regex.replace(Yaml.Regex.regex("\\r\\n|\\r"), template: "\n")(s)
 }
 
-func unwrapQuotedString (s: String) -> String {
-  return s[s.startIndex.successor()..<s.endIndex.predecessor()]
+private func unwrapQuotedString (_ s: String) -> String {
+  return s[s.index(after: s.startIndex)..<s.index(before: s.endIndex)]
 }
 
-func unescapeSingleQuotes (s: String) -> String {
-  return replace(regex("''"), template: "'")(s)
+private func unescapeSingleQuotes (_ s: String) -> String {
+  return Yaml.Regex.replace(Yaml.Regex.regex("''"), template: "'")(s)
 }
 
-func unescapeDoubleQuotes (input: String) -> String {
+private func unescapeDoubleQuotes (_ input: String) -> String {
   return input
-    |> replace(regex("\\\\([0abtnvfre \"\\/N_LP])"))
-    { $ in escapeCharacters[$[1]] ?? "" }
-    |> replace(regex("\\\\x([0-9A-Fa-f]{2})"))
-    { $ in String(UnicodeScalar(parseInt($[1], radix: 16))) }
-    |> replace(regex("\\\\u([0-9A-Fa-f]{4})"))
-    { $ in String(UnicodeScalar(parseInt($[1], radix: 16))) }
-    |> replace(regex("\\\\U([0-9A-Fa-f]{8})"))
-    { $ in String(UnicodeScalar(parseInt($[1], radix: 16))) }
+    |> Yaml.Regex.replace(Yaml.Regex.regex("\\\\([0abtnvfre \"\\/N_LP])"))
+    { escapeCharacters[$0[1]] ?? "" }
+    |> Yaml.Regex.replace(Yaml.Regex.regex("\\\\x([0-9A-Fa-f]{2})"))
+    { String(describing: UnicodeScalar(parseInt($0[1], radix: 16))) }
+    |> Yaml.Regex.replace(Yaml.Regex.regex("\\\\u([0-9A-Fa-f]{4})"))
+    { String(describing: UnicodeScalar(parseInt($0[1], radix: 16))) }
+    |> Yaml.Regex.replace(Yaml.Regex.regex("\\\\U([0-9A-Fa-f]{8})"))
+    { String(describing: UnicodeScalar(parseInt($0[1], radix: 16))) }
 }
 
-let escapeCharacters = [
+private let escapeCharacters = [
   "0": "\0",
   "a": "\u{7}",
   "b": "\u{8}",
@@ -624,825 +1443,4 @@ let escapeCharacters = [
   "P": "\u{2029}"
 ]
 
-import Foundation
 
-func matchRange (string: String, regex: NSRegularExpression) -> NSRange {
-  let sr = NSMakeRange(0, string.utf16.count)
-  return regex.rangeOfFirstMatchInString(string, options: [], range: sr)
-}
-
-func matches (string: String, regex: NSRegularExpression) -> Bool {
-  return matchRange(string, regex: regex).location != NSNotFound
-}
-
-func regex (pattern: String, options: String = "") -> NSRegularExpression! {
-  if matches(options, regex: invalidOptionsPattern) {
-    return nil
-  }
-
-  let opts = options.characters.reduce(NSRegularExpressionOptions()) { (acc, opt) -> NSRegularExpressionOptions in
-    return NSRegularExpressionOptions(rawValue:acc.rawValue | (regexOptions[opt] ?? NSRegularExpressionOptions()).rawValue)
-  }
-  do {
-    return try NSRegularExpression(pattern: pattern, options: opts)
-  } catch _ {
-    return nil
-  }
-}
-
-let invalidOptionsPattern =
-  try! NSRegularExpression(pattern: "[^ixsm]", options: [])
-
-let regexOptions: [Character: NSRegularExpressionOptions] = [
-  "i": .CaseInsensitive,
-  "x": .AllowCommentsAndWhitespace,
-  "s": .DotMatchesLineSeparators,
-  "m": .AnchorsMatchLines
-]
-
-func replace (regex: NSRegularExpression, template: String) -> String
-  -> String {
-    return { string in
-      let s = NSMutableString(string: string)
-      let range = NSMakeRange(0, string.utf16.count)
-      regex.replaceMatchesInString(s, options: [], range: range,
-                                   withTemplate: template)
-      return s as String
-    }
-}
-
-func replace (regex: NSRegularExpression, block: [String] -> String)
-  -> String -> String {
-    return { string in
-      let s = NSMutableString(string: string)
-      let range = NSMakeRange(0, string.utf16.count)
-      var offset = 0
-      regex.enumerateMatchesInString(string, options: [], range: range) {
-        result, _, _ in
-        if let result = result {
-          var captures = [String](count: result.numberOfRanges, repeatedValue: "")
-          for i in 0..<result.numberOfRanges {
-            if let r = result.rangeAtIndex(i).toRange() {
-              captures[i] = (string as NSString).substringWithRange(NSRange(r))
-            }
-          }
-          let replacement = block(captures)
-          let offR = NSMakeRange(result.range.location + offset, result.range.length)
-          offset += replacement.characters.count - result.range.length
-          s.replaceCharactersInRange(offR, withString: replacement)
-        }
-      }
-      return s as String
-    }
-}
-
-func splitLead (regex: NSRegularExpression) -> String
-  -> (String, String) {
-    return { string in
-      let r = matchRange(string, regex: regex)
-      if r.location == NSNotFound {
-        return ("", string)
-      } else {
-        let s = string as NSString
-        let i = r.location + r.length
-        return (s.substringToIndex(i), s.substringFromIndex(i))
-      }
-    }
-}
-
-func splitTrail (regex: NSRegularExpression) -> String
-  -> (String, String) {
-    return { string in
-      let r = matchRange(string, regex: regex)
-      if r.location == NSNotFound {
-        return (string, "")
-      } else {
-        let s = string as NSString
-        let i = r.location
-        return (s.substringToIndex(i), s.substringFromIndex(i))
-      }
-    }
-}
-
-func substringWithRange (range: NSRange) -> String -> String {
-  return { string in
-    return (string as NSString).substringWithRange(range)
-  }
-}
-
-func substringFromIndex (index: Int) -> String -> String {
-  return { string in
-    return (string as NSString).substringFromIndex(index)
-  }
-}
-
-func substringToIndex (index: Int) -> String -> String {
-  return { string in
-    return (string as NSString).substringToIndex(index)
-  }
-}
-
-public enum Result<T> {
-  case Error(String)
-  case Value(Box<T>)
-
-  public var error: String? {
-    switch self {
-    case .Error(let e): return e
-    case .Value: return nil
-    }
-  }
-
-  public var value: T? {
-    switch self {
-    case .Error: return nil
-    case .Value(let v): return v.value
-    }
-  }
-
-  public func map <U> (f: T -> U) -> Result<U> {
-    switch self {
-    case .Error(let e): return .Error(e)
-    case .Value(let v): return .Value(Box(f(v.value)))
-    }
-  }
-
-  public func flatMap <U> (f: T -> Result<U>) -> Result<U> {
-    switch self {
-    case .Error(let e): return .Error(e)
-    case .Value(let v): return f(v.value)
-    }
-  }
-}
-
-infix operator <*> { associativity left }
-func <*> <T, U> (f: Result<T -> U>, x: Result<T>) -> Result<U> {
-  switch (x, f) {
-  case (.Error(let e), _): return .Error(e)
-  case (.Value, .Error(let e)): return .Error(e)
-  case (.Value(let x), .Value(let f)): return .Value(Box(f.value(x.value)))
-  }
-}
-
-infix operator <^> { associativity left }
-func <^> <T, U> (f: T -> U, x: Result<T>) -> Result<U> {
-  return x.map(f)
-}
-
-infix operator >>- { associativity left }
-func >>- <T, U> (x: Result<T>, f: T -> U) -> Result<U> {
-  return x.map(f)
-}
-
-infix operator >>=- { associativity left }
-func >>=- <T, U> (x: Result<T>, f: T -> Result<U>) -> Result<U> {
-  return x.flatMap(f)
-}
-
-infix operator >>| { associativity left }
-func >>| <T, U> (x: Result<T>, y: Result<U>) -> Result<U> {
-  return x.flatMap { _ in y }
-}
-
-func lift <V> (v: V) -> Result<V> {
-  return .Value(Box(v))
-}
-
-func fail <T> (e: String) -> Result<T> {
-  return .Error(e)
-}
-
-func join <T> (x: Result<Result<T>>) -> Result<T> {
-  return x >>=- { i in i }
-}
-
-func `guard` (@autoclosure error: () -> String, check: Bool) -> Result<()> {
-  return check ? lift(()) : .Error(error())
-}
-
-// Required for boxing for now.
-public class Box<T> {
-  let _value: () -> T
-
-  init(_ value: T) {
-    _value = { value }
-  }
-
-  var value: T {
-    return _value()
-  }
-}
-
-
-import Foundation
-
-enum TokenType: Swift.String, CustomStringConvertible {
-  case YamlDirective = "%YAML"
-  case DocStart = "doc-start"
-  case DocEnd = "doc-end"
-  case Comment = "comment"
-  case Space = "space"
-  case NewLine = "newline"
-  case Indent = "indent"
-  case Dedent = "dedent"
-  case Null = "null"
-  case True = "true"
-  case False = "false"
-  case InfinityP = "+infinity"
-  case InfinityN = "-infinity"
-  case NaN = "nan"
-  case Double = "double"
-  case Int = "int"
-  case IntOct = "int-oct"
-  case IntHex = "int-hex"
-  case IntSex = "int-sex"
-  case Anchor = "&"
-  case Alias = "*"
-  case Comma = ","
-  case OpenSB = "["
-  case CloseSB = "]"
-  case Dash = "-"
-  case OpenCB = "{"
-  case CloseCB = "}"
-  case Key = "key"
-  case KeyDQ = "key-dq"
-  case KeySQ = "key-sq"
-  case QuestionMark = "?"
-  case ColonFO = ":-flow-out"
-  case ColonFI = ":-flow-in"
-  case Colon = ":"
-  case Literal = "|"
-  case Folded = ">"
-  case Reserved = "reserved"
-  case StringDQ = "string-dq"
-  case StringSQ = "string-sq"
-  case StringFI = "string-flow-in"
-  case StringFO = "string-flow-out"
-  case String = "string"
-  case End = "end"
-
-  var description: Swift.String {
-    return self.rawValue
-  }
-}
-
-typealias TokenPattern = (type: TokenType, pattern: NSRegularExpression)
-typealias TokenMatch = (type: TokenType, match: String)
-
-let bBreak = "(?:\\r\\n|\\r|\\n)"
-
-// printable non-space chars,
-// except `:`(3a), `#`(23), `,`(2c), `[`(5b), `]`(5d), `{`(7b), `}`(7d)
-let safeIn = "\\x21\\x22\\x24-\\x2b\\x2d-\\x39\\x3b-\\x5a\\x5c\\x5e-\\x7a" +
-  "\\x7c\\x7e\\x85\\xa0-\\ud7ff\\ue000-\\ufefe\\uff00\\ufffd" +
-"\\U00010000-\\U0010ffff"
-// with flow indicators: `,`, `[`, `]`, `{`, `}`
-let safeOut = "\\x2c\\x5b\\x5d\\x7b\\x7d" + safeIn
-let plainOutPattern =
-  "([\(safeOut)]#|:(?![ \\t]|\(bBreak))|[\(safeOut)]|[ \\t])+"
-let plainInPattern =
-  "([\(safeIn)]#|:(?![ \\t]|\(bBreak))|[\(safeIn)]|[ \\t]|\(bBreak))+"
-let dashPattern = regex("^-([ \\t]+(?!#|\(bBreak))|(?=[ \\t\\n]))")
-let finish = "(?= *(,|\\]|\\}|( #.*)?(\(bBreak)|$)))"
-let tokenPatterns: [TokenPattern] = [
-  (.YamlDirective, regex("^%YAML(?= )")),
-  (.DocStart, regex("^---")),
-  (.DocEnd, regex("^\\.\\.\\.")),
-  (.Comment, regex("^#.*|^\(bBreak) *(#.*)?(?=\(bBreak)|$)")),
-  (.Space, regex("^ +")),
-  (.NewLine, regex("^\(bBreak) *")),
-  (.Dash, dashPattern),
-  (.Null, regex("^(null|Null|NULL|~)\(finish)")),
-  (.True, regex("^(true|True|TRUE)\(finish)")),
-  (.False, regex("^(false|False|FALSE)\(finish)")),
-  (.InfinityP, regex("^\\+?\\.(inf|Inf|INF)\(finish)")),
-  (.InfinityN, regex("^-\\.(inf|Inf|INF)\(finish)")),
-  (.NaN, regex("^\\.(nan|NaN|NAN)\(finish)")),
-  (.Int, regex("^[-+]?[0-9]+\(finish)")),
-  (.IntOct, regex("^0o[0-7]+\(finish)")),
-  (.IntHex, regex("^0x[0-9a-fA-F]+\(finish)")),
-  (.IntSex, regex("^[0-9]{2}(:[0-9]{2})+\(finish)")),
-  (.Double, regex("^[-+]?(\\.[0-9]+|[0-9]+(\\.[0-9]*)?)([eE][-+]?[0-9]+)?\(finish)")),
-  (.Anchor, regex("^&\\w+")),
-  (.Alias, regex("^\\*\\w+")),
-  (.Comma, regex("^,")),
-  (.OpenSB, regex("^\\[")),
-  (.CloseSB, regex("^\\]")),
-  (.OpenCB, regex("^\\{")),
-  (.CloseCB, regex("^\\}")),
-  (.QuestionMark, regex("^\\?( +|(?=\(bBreak)))")),
-  (.ColonFO, regex("^:(?!:)")),
-  (.ColonFI, regex("^:(?!:)")),
-  (.Literal, regex("^\\|.*")),
-  (.Folded, regex("^>.*")),
-  (.Reserved, regex("^[@`]")),
-  (.StringDQ, regex("^\"([^\\\\\"]|\\\\(.|\(bBreak)))*\"")),
-  (.StringSQ, regex("^'([^']|'')*'")),
-  (.StringFO, regex("^\(plainOutPattern)(?=:([ \\t]|\(bBreak))|\(bBreak)|$)")),
-  (.StringFI, regex("^\(plainInPattern)")),
-]
-
-func escapeErrorContext (text: String) -> String {
-  let endIndex = text.startIndex.advancedBy(50, limit: text.endIndex)
-  let escaped = text.substringToIndex(endIndex)
-    |> replace(regex("\\r"), template: "\\\\r")
-    |> replace(regex("\\n"), template: "\\\\n")
-    |> replace(regex("\""), template: "\\\\\"")
-  return "near \"\(escaped)\""
-}
-
-func tokenize (text: String) -> Result<[TokenMatch]> {
-  var text = text
-  var matchList: [TokenMatch] = []
-  var indents = [0]
-  var insideFlow = 0
-  next:
-    while text.endIndex > text.startIndex {
-      for tokenPattern in tokenPatterns {
-        let range = matchRange(text, regex: tokenPattern.pattern)
-        if range.location != NSNotFound {
-          let rangeEnd = range.location + range.length
-          switch tokenPattern.type {
-
-          case .NewLine:
-            let match = text |> substringWithRange(range)
-            let lastIndent = indents.last ?? 0
-            let rest = match.substringFromIndex(match.startIndex.successor())
-            let spaces = rest.characters.count
-            let nestedBlockSequence =
-              matches(text |> substringFromIndex(rangeEnd), regex: dashPattern)
-            if spaces == lastIndent {
-              matchList.append(TokenMatch(.NewLine, match))
-            } else if spaces > lastIndent {
-              if insideFlow == 0 {
-                if matchList.last != nil &&
-                  matchList[matchList.endIndex - 1].type == .Indent {
-                  indents[indents.endIndex - 1] = spaces
-                  matchList[matchList.endIndex - 1] = TokenMatch(.Indent, match)
-                } else {
-                  indents.append(spaces)
-                  matchList.append(TokenMatch(.Indent, match))
-                }
-              }
-            } else if nestedBlockSequence && spaces == lastIndent - 1 {
-              matchList.append(TokenMatch(.NewLine, match))
-            } else {
-              while nestedBlockSequence && spaces < (indents.last ?? 0) - 1
-                || !nestedBlockSequence && spaces < indents.last {
-                  indents.removeLast()
-                  matchList.append(TokenMatch(.Dedent, ""))
-              }
-              matchList.append(TokenMatch(.NewLine, match))
-            }
-
-          case .Dash, .QuestionMark:
-            let match = text |> substringWithRange(range)
-            let index = match.startIndex.successor()
-            let indent = match.characters.count
-            indents.append((indents.last ?? 0) + indent)
-            matchList.append(
-              TokenMatch(tokenPattern.type, match.substringToIndex(index)))
-            matchList.append(TokenMatch(.Indent, match.substringFromIndex(index)))
-
-          case .ColonFO:
-            if insideFlow > 0 {
-              continue
-            }
-            fallthrough
-
-          case .ColonFI:
-            let match = text |> substringWithRange(range)
-            matchList.append(TokenMatch(.Colon, match))
-            if insideFlow == 0 {
-              indents.append((indents.last ?? 0) + 1)
-              matchList.append(TokenMatch(.Indent, ""))
-            }
-
-          case .OpenSB, .OpenCB:
-            insideFlow += 1
-            matchList.append(TokenMatch(tokenPattern.type, text |> substringWithRange(range)))
-
-          case .CloseSB, .CloseCB:
-            insideFlow -= 1
-            matchList.append(TokenMatch(tokenPattern.type, text |> substringWithRange(range)))
-
-          case .Literal, .Folded:
-            matchList.append(TokenMatch(tokenPattern.type, text |> substringWithRange(range)))
-            text = text |> substringFromIndex(rangeEnd)
-            let lastIndent = indents.last ?? 0
-            let minIndent = 1 + lastIndent
-            let blockPattern = regex(("^(\(bBreak) *)*(\(bBreak)" +
-              "( {\(minIndent),})[^ ].*(\(bBreak)( *|\\3.*))*)(?=\(bBreak)|$)"))
-            let (lead, rest) = text |> splitLead(blockPattern)
-            text = rest
-            let block = (lead
-              |> replace(regex("^\(bBreak)"), template: "")
-              |> replace(regex("^ {0,\(lastIndent)}"), template: "")
-              |> replace(regex("\(bBreak) {0,\(lastIndent)}"), template: "\n")
-              ) + (matches(text, regex: regex("^\(bBreak)")) && lead.endIndex > lead.startIndex
-                ? "\n" : "")
-            matchList.append(TokenMatch(.String, block))
-            continue next
-
-          case .StringFO:
-            if insideFlow > 0 {
-              continue
-            }
-            let indent = (indents.last ?? 0)
-            let blockPattern = regex(("^\(bBreak)( *| {\(indent),}" +
-              "\(plainOutPattern))(?=\(bBreak)|$)"))
-            var block = text
-              |> substringWithRange(range)
-              |> replace(regex("^[ \\t]+|[ \\t]+$"), template: "")
-            text = text |> substringFromIndex(rangeEnd)
-            while true {
-              let range = matchRange(text, regex: blockPattern)
-              if range.location == NSNotFound {
-                break
-              }
-              let s = text |> substringWithRange(range)
-              block += "\n" +
-                replace(regex("^\(bBreak)[ \\t]*|[ \\t]+$"), template: "")(s)
-              text = text |> substringFromIndex(range.location + range.length)
-            }
-            matchList.append(TokenMatch(.String, block))
-            continue next
-
-          case .StringFI:
-            let match = text
-              |> substringWithRange(range)
-              |> replace(regex("^[ \\t]|[ \\t]$"), template: "")
-            matchList.append(TokenMatch(.String, match))
-
-          case .Reserved:
-            return fail(escapeErrorContext(text))
-
-          default:
-            matchList.append(TokenMatch(tokenPattern.type, text |> substringWithRange(range)))
-          }
-          text = text |> substringFromIndex(rangeEnd)
-          continue next
-        }
-      }
-      return fail(escapeErrorContext(text))
-  }
-  while indents.count > 1 {
-    indents.removeLast()
-    matchList.append((.Dedent, ""))
-  }
-  matchList.append((.End, ""))
-  return lift(matchList)
-}
-
-public enum Yaml {
-  case Null
-  case Bool(Swift.Bool)
-  case Int(Swift.Int)
-  case Double(Swift.Double)
-  case String(Swift.String)
-  case Array([Yaml])
-  case Dictionary([Yaml: Yaml])
-}
-
-extension Yaml: NilLiteralConvertible {
-  public init(nilLiteral: ()) {
-    self = .Null
-  }
-}
-
-extension Yaml: BooleanLiteralConvertible {
-  public init(booleanLiteral: BooleanLiteralType) {
-    self = .Bool(booleanLiteral)
-  }
-}
-
-extension Yaml: IntegerLiteralConvertible {
-  public init(integerLiteral: IntegerLiteralType) {
-    self = .Int(integerLiteral)
-  }
-}
-
-extension Yaml: FloatLiteralConvertible {
-  public init(floatLiteral: FloatLiteralType) {
-    self = .Double(floatLiteral)
-  }
-}
-
-extension Yaml: StringLiteralConvertible {
-  public init(stringLiteral: StringLiteralType) {
-    self = .String(stringLiteral)
-  }
-
-  public init(extendedGraphemeClusterLiteral: StringLiteralType) {
-    self = .String(extendedGraphemeClusterLiteral)
-  }
-
-  public init(unicodeScalarLiteral: StringLiteralType) {
-    self = .String(unicodeScalarLiteral)
-  }
-}
-
-extension Yaml: ArrayLiteralConvertible {
-  public init(arrayLiteral elements: Yaml...) {
-    var array = [Yaml]()
-    array.reserveCapacity(elements.count)
-    for element in elements {
-      array.append(element)
-    }
-    self = .Array(array)
-  }
-}
-
-extension Yaml: DictionaryLiteralConvertible {
-  public init(dictionaryLiteral elements: (Yaml, Yaml)...) {
-    var dictionary = [Yaml: Yaml]()
-    for (k, v) in elements {
-      dictionary[k] = v
-    }
-    self = .Dictionary(dictionary)
-  }
-}
-
-extension Yaml: CustomStringConvertible {
-  public var description: Swift.String {
-    switch self {
-    case .Null:
-      return "Null"
-    case .Bool(let b):
-      return "Bool(\(b))"
-    case .Int(let i):
-      return "Int(\(i))"
-    case .Double(let f):
-      return "Double(\(f))"
-    case .String(let s):
-      return "String(\(s))"
-    case .Array(let s):
-      return "Array(\(s))"
-    case .Dictionary(let m):
-      return "Dictionary(\(m))"
-    }
-  }
-}
-
-extension Yaml: Hashable {
-  public var hashValue: Swift.Int {
-    return description.hashValue
-  }
-}
-
-extension Yaml {
-  public static func load (text: Swift.String) -> Result<Yaml> {
-    return tokenize(text) >>=- parseDoc
-  }
-
-  public static func loadMultiple (text: Swift.String) -> Result<[Yaml]> {
-    return tokenize(text) >>=- parseDocs
-  }
-
-  public static func debug (text: Swift.String) -> Result<Yaml> {
-    let result = tokenize(text)
-      >>- { tokens in print("\n====== Tokens:\n\(tokens)"); return tokens }
-      >>=- parseDoc
-      >>- { value -> Yaml in print("------ Doc:\n\(value)"); return value }
-    if let error = result.error {
-      print("~~~~~~\n\(error)")
-    }
-    return result
-  }
-
-  public static func debugMultiple (text: Swift.String) -> Result<[Yaml]> {
-    let result = tokenize(text)
-      >>- { tokens in print("\n====== Tokens:\n\(tokens)"); return tokens }
-      >>=- parseDocs
-      >>- { values -> [Yaml] in values.forEach {
-        v in print("------ Doc:\n\(v)")
-        }; return values }
-    if let error = result.error {
-      print("~~~~~~\n\(error)")
-    }
-    return result
-  }
-}
-
-extension Yaml {
-  public subscript(index: Swift.Int) -> Yaml {
-    get {
-      assert(index >= 0)
-      switch self {
-      case .Array(let array):
-        if index >= array.startIndex && index < array.endIndex {
-          return array[index]
-        } else {
-          return .Null
-        }
-      default:
-        return .Null
-      }
-    }
-    set {
-      assert(index >= 0)
-      switch self {
-      case .Array(let array):
-        let emptyCount = max(0, index + 1 - array.count)
-        let empty = [Yaml](count: emptyCount, repeatedValue: .Null)
-        var new = array
-        new.appendContentsOf(empty)
-        new[index] = newValue
-        self = .Array(new)
-      default:
-        var array = [Yaml](count: index + 1, repeatedValue: .Null)
-        array[index] = newValue
-        self = .Array(array)
-      }
-    }
-  }
-
-  public subscript(key: Yaml) -> Yaml {
-    get {
-      switch self {
-      case .Dictionary(let dictionary):
-        return dictionary[key] ?? .Null
-      default:
-        return .Null
-      }
-    }
-    set {
-      switch self {
-      case .Dictionary(let dictionary):
-        var new = dictionary
-        new[key] = newValue
-        self = .Dictionary(new)
-      default:
-        var dictionary = [Yaml: Yaml]()
-        dictionary[key] = newValue
-        self = .Dictionary(dictionary)
-      }
-    }
-  }
-}
-
-extension Yaml {
-  public var bool: Swift.Bool? {
-    switch self {
-    case .Bool(let b):
-      return b
-    default:
-      return nil
-    }
-  }
-
-  public var int: Swift.Int? {
-    switch self {
-    case .Int(let i):
-      return i
-    case .Double(let f):
-      if Swift.Double(Swift.Int(f)) == f {
-        return Swift.Int(f)
-      } else {
-        return nil
-      }
-    default:
-      return nil
-    }
-  }
-
-  public var double: Swift.Double? {
-    switch self {
-    case .Double(let f):
-      return f
-    case .Int(let i):
-      return Swift.Double(i)
-    default:
-      return nil
-    }
-  }
-
-  public var string: Swift.String? {
-    switch self {
-    case .String(let s):
-      return s
-    default:
-      return nil
-    }
-  }
-
-  public var array: [Yaml]? {
-    switch self {
-    case .Array(let array):
-      return array
-    default:
-      return nil
-    }
-  }
-
-  public var dictionary: [Yaml: Yaml]? {
-    switch self {
-    case .Dictionary(let dictionary):
-      return dictionary
-    default:
-      return nil
-    }
-  }
-
-  public var count: Swift.Int? {
-    switch self {
-    case .Array(let array):
-      return array.count
-    case .Dictionary(let dictionary):
-      return dictionary.count
-    default:
-      return nil
-    }
-  }
-}
-
-public func == (lhs: Yaml, rhs: Yaml) -> Bool {
-  switch lhs {
-
-  case .Null:
-    switch rhs {
-    case .Null:
-      return true
-    default:
-      return false
-    }
-
-  case .Bool(let lv):
-    switch rhs {
-    case .Bool(let rv):
-      return lv == rv
-    default:
-      return false
-    }
-
-  case .Int(let lv):
-    switch rhs {
-    case .Int(let rv):
-      return lv == rv
-    case .Double(let rv):
-      return Double(lv) == rv
-    default:
-      return false
-    }
-
-  case .Double(let lv):
-    switch rhs {
-    case .Double(let rv):
-      return lv == rv
-    case .Int(let rv):
-      return lv == Double(rv)
-    default:
-      return false
-    }
-
-  case .String(let lv):
-    switch rhs {
-    case .String(let rv):
-      return lv == rv
-    default:
-      return false
-    }
-
-  case .Array(let lv):
-    switch rhs {
-    case .Array(let rv) where lv.count == rv.count:
-      for i in 0..<lv.count {
-        if lv[i] != rv[i] {
-          return false
-        }
-      }
-      return true
-    default:
-      return false
-    }
-
-  case .Dictionary(let lv):
-    switch rhs {
-    case .Dictionary(let rv) where lv.count == rv.count:
-      for (k, v) in lv {
-        if rv[k] == nil || rv[k] != v {
-          return false
-        }
-      }
-      return true
-    default:
-      return false
-    }
-  }
-}
-
-public func != (lhs: Yaml, rhs: Yaml) -> Bool {
-  return !(lhs == rhs)
-}
-
-// unary `-` operator
-public prefix func - (value: Yaml) -> Yaml {
-  switch value {
-  case .Int(let v):
-    return .Int(-v)
-  case .Double(let v):
-    return .Double(-v)
-  default:
-    fatalError("`-` operator may only be used on .Int or .Double Yaml values")
-  }
-}
