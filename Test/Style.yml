@@ -18,7 +18,7 @@ Extension.FooView:
   margin: 12
   opaque: true
   font: $Typography.small
-  textAlignment: Enum(NSTextAlignment.Center)
+  textAlignment: Enum(NSTextAlignment.center)
   image: Image(myImage)
   aPoint: Point(10,10)
   aSize: Size(100,100)
