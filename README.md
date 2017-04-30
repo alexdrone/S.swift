@@ -88,7 +88,7 @@ Like in the example shown above, **S** supports conditions for the value that ta
 *One liner.* Copy and paste this in your terminal.
 
 ```
-curl "https://raw.githubusercontent.com/alexdrone/S/master/sgen" > sgen && mv sgen /usr/local/bin/sgen && chmod +x /usr/local/bin/sgen 
+curl "https://raw.githubusercontent.com/alexdrone/S.swift/master/sgen" > sgen && mv sgen /usr/local/bin/sgen && chmod +x /usr/local/bin/sgen 
 ```
 
 The usage of the generator is as simple as 
