@@ -277,9 +277,9 @@ extension RhsValue: Generatable {
 
     //system font
     if font.isSystemBoldFont || font.isSystemFont {
-      let function = font.isSystemFont ? "systemFontOfSize" : "boldSystemFontOfSize"
+      let function = font.isSystemFont ? "systemFont" : "boldSystemFont"
       let weight = font.hasWeight ? ", weight: \(font.weight!)" : ""
-      return "\(prefix)\(fontClass).\(function)(\(font.fontSize)\(weight))"
+      return "\(prefix)\(fontClass).\(function)(ofSize: \(font.fontSize)\(weight))"
     }
 
     //font with name
@@ -401,18 +401,20 @@ class Style {
     var styleName = name.trimmingCharacters(in: CharacterSet.whitespaces)
 
     // Check if this could generate an extension.
-    let extensionPrefix = "Extension."
+    let extensionPrefix = "__appearance_proxy__"
     if styleName.contains(extensionPrefix) {
       styleName = styleName.replacingOccurrences(of: extensionPrefix, with: "")
       self.isExtension = true
     }
-    let openPrefix = "Open."
+    let openPrefix = "__open__"
     if styleName.contains(openPrefix) {
       styleName = styleName.replacingOccurrences(of: openPrefix, with: "")
       self.isOverridable = true
     }
+    // Trims spaces
+    styleName = styleName.replacingOccurrences(of: " ", with: "")
     // Superclass defined.
-    if let components = Optional(styleName.components(separatedBy: "<")), components.count == 2 {
+    if let components = Optional(styleName.components(separatedBy: "extends")), components.count == 2 {
       styleName = components[0].replacingOccurrences(of: " ", with: "")
       self.superclassName = components[1].replacingOccurrences(of: " ", with: "")
     }

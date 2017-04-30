@@ -8,7 +8,7 @@ extension Condition: Generatable {
     for expression in self.expressions {
 
       let size = Configuration.targetOsx
-          ? "NSApplication.shared().mainWindow?.frame.size"
+          ? "(NSApplication.shared().mainWindow?.frame.size ?? CGSize.zero)"
           : "UIScreen.main.fixedCoordinateSpace.bounds.size"
 
       if Configuration.targetOsx {

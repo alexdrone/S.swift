@@ -5,21 +5,12 @@
 
 import Cocoa
 
-fileprivate var __ApperanceProxyHandle: UInt8 = 0
-
-/// Your view should conform to 'AppearaceProxyComponent'.
-public protocol AppearaceProxyComponent: class {
-	associatedtype ApperanceProxyType
-	var appearanceProxy: ApperanceProxyType { get }
-	func didChangeAppearanceProxy()
-}
-
 /// Entry point for the app stylesheet
 public class S {
 
-//MARK: - DefaultButton
-	public static let DefaultButton = DefaultButtonAppearanceProxy()
-	public class DefaultButtonAppearanceProxy: FooViewAppearanceProxy {
+//MARK: - DefaultButton<FooView
+	public static let DefaultButton<FooView = DefaultButton<FooViewAppearanceProxy()
+	public class DefaultButton<FooViewAppearanceProxy {
 
 		//MARK: color 
 		fileprivate var _color: NSColor?
@@ -33,15 +24,25 @@ public class S {
 		}
 
 		//MARK: opaque 
-		override public func opaqueProperty() -> Bool {
+		fileprivate var _opaque: Bool?
+		public func opaqueProperty() -> Bool {
 			if let override = _opaque { return override }
 			return false
 		}
+		public var opaque: Bool {
+			get { return self.opaqueProperty() }
+			set { _opaque = newValue }
+		}
 
 		//MARK: margin 
-		override public func marginProperty() -> CGFloat {
+		fileprivate var _margin: CGFloat?
+		public func marginProperty() -> CGFloat {
 			if let override = _margin { return override }
 			return CGFloat(12.0)
+		}
+		public var margin: CGFloat {
+			get { return self.marginProperty() }
+			set { _margin = newValue }
 		}
 	}
 //MARK: - Typography
@@ -78,7 +79,7 @@ public class S {
 		fileprivate var _red: NSColor?
 		public func redProperty() -> NSColor {
 			if let override = _red { return override }
-			if NSApplication.shared().mainWindow?.frame.size.width < 300.0 { 
+			if (NSApplication.shared().mainWindow?.frame.size ?? CGSize.zero).width < 300.0 { 
 			return NSColor(red: 0.666667, green: 0.0, blue: 0.0, alpha: 1.0)
 			}
 			
@@ -100,9 +101,9 @@ public class S {
 			set { _blue = newValue }
 		}
 	}
-//MARK: - FooView
-	public static let FooView = FooViewAppearanceProxy()
-	public class FooViewAppearanceProxy {
+//MARK: - Extension.FooView
+	public static let Extension.FooView = Extension.FooViewAppearanceProxy()
+	public class Extension.FooViewAppearanceProxy {
 
 		//MARK: backgroundColor 
 		fileprivate var _backgroundColor: NSColor?
@@ -149,18 +150,4 @@ public class S {
 		}
 	}
 
-}
-extension FooView: AppearaceProxyComponent {
-
-	public typealias ApperanceProxyType = S.FooViewAppearanceProxy
-	public var appearanceProxy: ApperanceProxyType {
-		get {
-			guard let proxy = objc_getAssociatedObject(self, &__ApperanceProxyHandle) as? ApperanceProxyType else { return S.FooView }
-			return proxy
-		}
-		set {
-			objc_setAssociatedObject(self, &__ApperanceProxyHandle, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-			didChangeAppearanceProxy()
-		}
-	}
 }

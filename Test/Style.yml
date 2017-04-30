@@ -9,12 +9,12 @@ Typography:
   small: font(System, 12)
   medium: font(System-Semibold, 18)
 
-Extension.DefaultButton < FooView:
+__appearance_proxy__ DefaultButton < FooView:
   margin: 12
   opaque: false
   color: $Color.blue
 
-Extension.FooView:
+__appearance_proxy__ __open__ FooView:
   margin: 12
   opaque: true
   font: $Typography.small

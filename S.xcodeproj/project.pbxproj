@@ -13,6 +13,7 @@
 		164DC70E1C7F569100859EC0 /* Yaml.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F9E05A1C772B080083C55D /* Yaml.swift */; };
 		164DC70F1C7F569B00859EC0 /* Generatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1646022F1C77334800FC9992 /* Generatable.swift */; };
 		164DC7101C7F571600859EC0 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16AC37191C7772EE00F61BE9 /* Utils.swift */; };
+		166FCA171EB5DCB0008EF0DF /* Style.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168354451C808BCB008EA29F /* Style.generated.swift */; };
 		168354431C808BA8008EA29F /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168354421C808BA8008EA29F /* Condition.swift */; };
 		168354441C808BA8008EA29F /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168354421C808BA8008EA29F /* Condition.swift */; };
 		16AC371A1C7772EE00F61BE9 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16AC37191C7772EE00F61BE9 /* Utils.swift */; };
@@ -46,7 +47,7 @@
 		16F9E0351C772AAC0083C55D /* S.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = S.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		16F9E0381C772AAC0083C55D /* S.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = S.h; sourceTree = "<group>"; };
 		16F9E03A1C772AAC0083C55D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		16F9E0531C772AD30083C55D /* S */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = S; sourceTree = BUILT_PRODUCTS_DIR; };
+		16F9E0531C772AD30083C55D /* sgen */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sgen; sourceTree = BUILT_PRODUCTS_DIR; };
 		16F9E0551C772AD30083C55D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		16F9E05A1C772B080083C55D /* Yaml.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Yaml.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -91,7 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				16F9E0351C772AAC0083C55D /* S.framework */,
-				16F9E0531C772AD30083C55D /* S */,
+				16F9E0531C772AD30083C55D /* sgen */,
 			);
 			name = products;
 			sourceTree = "<group>";
@@ -169,7 +170,7 @@
 			);
 			name = sgen;
 			productName = SwatchGenerator;
-			productReference = 16F9E0531C772AD30083C55D /* S */;
+			productReference = 16F9E0531C772AD30083C55D /* sgen */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -232,7 +233,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#sgen $SRCROOT --platform osx --extensions public\n";
+			shellScript = "$SRCROOT/sgen $SRCROOT --platform osx --extensions public\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -246,6 +247,7 @@
 				16F9E05B1C772B080083C55D /* Yaml.swift in Sources */,
 				16AC371A1C7772EE00F61BE9 /* Utils.swift in Sources */,
 				16F8FAE51C78D9F40055BA8F /* Generator.swift in Sources */,
+				166FCA171EB5DCB0008EF0DF /* Style.generated.swift in Sources */,
 				16AC371C1C78C69B00F61BE9 /* Rhs.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -405,7 +407,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				PRODUCT_NAME = S;
+				PRODUCT_NAME = sgen;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 3.0;
 			};
@@ -416,7 +418,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				PRODUCT_NAME = S;
+				PRODUCT_NAME = sgen;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 3.0;
 			};

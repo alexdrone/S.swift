@@ -73,12 +73,12 @@ func generate(file: String) {
 var args = [String](CommandLine.arguments)
 if args.count == 1 {
   print("\n")
-  print("usage: sgen PROJECT_PATH (--file FILENAME) --name STYLESHEET_NAME (--platform ios|osx) (--extensions internal|public) (--appExtension) (--objc) --import FRAMEWORKS")
+  print("usage: sgen PROJECT_PATH (--file FILENAME) --name STYLESHEET_NAME (--platform ios|osx) (--appearance_proxy internal|public) (--app_extension) (--objc) --import FRAMEWORKS")
   print("--file: If you're targetting one single file.")
   print("--name: The default is S.")
   print("--platform: use the **platform** argument to target the desired platform. The default one is **ios**")
-  print("--extensions: Creates extensions for the views that have a style defined in the stylesheet. *public* and *internal* define what the extensions' visibility modifier should be.")
-  print("--appExtensions: Generates a stylesheet with only apis allowed in the app extensions.")
+  print("--appearance_proxy: Creates appearance proxy extensions for the views that have a style defined with the __appearance_proxy__ prefix.")
+  print("--app_extensions: Generates a stylesheet with only apis allowed in the app extensions.")
   print("--objc: Generates **Swift** code that is interoperable with **Objective C**")
   print("\n")
   print("If you wish to **update** the generator, copy and paste this in your terminal:")
@@ -87,11 +87,21 @@ if args.count == 1 {
 }
 
 // Configuration.
-if args.contains("--objc") { Configuration.objcGeneration = true }
-if args.contains("--appExtension") { Configuration.appExtensionApiOnly = true }
-if args.contains("--extensions") { Configuration.extensionsEnabled = true }
-if args.contains("public") { Configuration.publicExtensions = true }
-if args.contains("--platform") && args.contains("osx") { Configuration.targetOsx = true }
+if args.contains("--objc") {
+  Configuration.objcGeneration = true
+}
+if args.contains("--app_extension") {
+  Configuration.appExtensionApiOnly = true
+}
+if args.contains("--appearance_proxy") {
+  Configuration.extensionsEnabled = true
+}
+if args.contains("--public") {
+  Configuration.publicExtensions = true
+}
+if args.contains("--platform") && args.contains("osx") {
+  Configuration.targetOsx = true
+}
 if args.contains("--file") {
   if let idx = args.index(of: "--file") {
     Configuration.singleFile = args[idx+1]

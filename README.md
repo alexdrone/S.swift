@@ -29,7 +29,7 @@ FooView:
   background: $Color.red #properties can also redirect to other style's properties
   font: $Typography.small
   defaultMargin: 10
-  textAlignment: Enum(NSTextAlignment.Center)
+  textAlignment: Enum(NSTextAlignment.center)
   image: Image(myImage)
   aPoint: Point(10,10)
   aSize: Size(100,100)
@@ -48,27 +48,27 @@ struct S {
 
     public static struct let Color: ColorAppearanceProxy
     public struct ColorAppearanceProxy {
-        public var blue: UIColor { get set }
+        public var blue: UIColor { ... }
         public func redProperty(traitCollection: UITraitCollection? = default) -> UIColor
-        public var red: UIColor { get set }
+        public var red: UIColor { ... }
     }
     
     public static struct let Typography: TypographyAppearanceProxy
     public struct TypographyAppearanceProxy {
-        public var small: UIFont { get set }
+        public var small: UIFont { ... }
     }
 
     public static struct let FooView: FooViewAppearanceProxy
     public struct FooViewAppearanceProxy {
-        public var margin: Float { get set }
-        public var font: UIFont { get set }
-        public var opaque: Bool { get set }
-        public var textAlignment: NSTextAlignment { get set }
-        public var image: NSImage { get set }
-        public var aPoint: CGPoint { get set }
-        public var aSize: CGSize { get set }
-        public var aRect: CGRect { get set }
-        public var aEdgeInsets: UIEdgeInsets { get set }
+        public var margin: Float { ... }
+        public var font: UIFont { ... }
+        public var opaque: Bool { ... }
+        public var textAlignment: NSTextAlignment { ... }
+        public var image: NSImage { ... }
+        public var aPoint: CGPoint { ... }
+        public var aSize: CGSize { ... }
+        public var aRect: CGRect { ... }
+        public var aEdgeInsets: UIEdgeInsets { ... }
     }
 }
 
@@ -105,7 +105,7 @@ sgen PROJECT_PATH (--platform ios|osx) (--extensions internal|public) (--objc)
 
 - `--platform [osx,ios]` use the **platform** argument to target the desired platform. The default one is **iOS**.
 - `--objc` Generates **Swift** code that is interoperable with **Objective C** (`@objc` modifier, `NSObject` subclasses)
-- `--extensions [internal,public]` Creates extensions for the views that have a style defined in the stylesheet. *public* and *internal* define what the extensions' visibility modifier should be.
+- `--appearance_proxy [internal,public]` Creates extensions for the views that have a style defined in the stylesheet. *public* and *internal* define what the extensions' visibility modifier should be.
 
 
 ## Adding S as a build script

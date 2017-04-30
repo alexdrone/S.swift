@@ -5,15 +5,6 @@
 
 import Cocoa
 
-fileprivate var __ApperanceProxyHandle: UInt8 = 0
-
-/// Your view should conform to 'AppearaceProxyComponent'.
-public protocol AppearaceProxyComponent: class {
-	associatedtype ApperanceProxyType
-	var appearanceProxy: ApperanceProxyType { get }
-	func didChangeAppearanceProxy()
-}
-
 /// Entry point for the app stylesheet
 public class S {
 
@@ -25,7 +16,7 @@ public class S {
 		fileprivate var _small: NSFont?
 		public func smallProperty() -> NSFont {
 			if let override = _small { return override }
-			return NSFont.systemFontOfSize(12.0)
+			return NSFont.systemFont(ofSize: 12.0)
 		}
 		public var small: NSFont {
 			get { return self.smallProperty() }
@@ -36,16 +27,16 @@ public class S {
 		fileprivate var _medium: NSFont?
 		public func mediumProperty() -> NSFont {
 			if let override = _medium { return override }
-			return NSFont.systemFontOfSize(18.0, weight: NSFontWeightSemibold)
+			return NSFont.systemFont(ofSize: 18.0, weight: NSFontWeightSemibold)
 		}
 		public var medium: NSFont {
 			get { return self.mediumProperty() }
 			set { _medium = newValue }
 		}
 	}
-//MARK: - DefaultButton
-	public static let DefaultButton = DefaultButtonAppearanceProxy()
-	public class DefaultButtonAppearanceProxy: FooViewAppearanceProxy {
+//MARK: - DefaultButton<FooView
+	public static let DefaultButton<FooView = DefaultButton<FooViewAppearanceProxy()
+	public class DefaultButton<FooViewAppearanceProxy {
 
 		//MARK: color 
 		fileprivate var _color: NSColor?
@@ -59,15 +50,25 @@ public class S {
 		}
 
 		//MARK: opaque 
-		override public func opaqueProperty() -> Bool {
+		fileprivate var _opaque: Bool?
+		public func opaqueProperty() -> Bool {
 			if let override = _opaque { return override }
 			return false
 		}
+		public var opaque: Bool {
+			get { return self.opaqueProperty() }
+			set { _opaque = newValue }
+		}
 
 		//MARK: margin 
-		override public func marginProperty() -> CGFloat {
+		fileprivate var _margin: CGFloat?
+		public func marginProperty() -> CGFloat {
 			if let override = _margin { return override }
 			return CGFloat(12.0)
+		}
+		public var margin: CGFloat {
+			get { return self.marginProperty() }
+			set { _margin = newValue }
 		}
 	}
 //MARK: - Color
@@ -78,10 +79,10 @@ public class S {
 		fileprivate var _red: NSColor?
 		public func redProperty() -> NSColor {
 			if let override = _red { return override }
-			if NSApplication.shared().mainWindow?.frame.size.width < 300.0 { 
+			if (NSApplication.shared().mainWindow?.frame.size ?? CGSize.zero).width < 300.0 { 
 			return NSColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0)
 			}
-			if NSApplication.shared().mainWindow?.frame.size.width > 300.0 { 
+			if (NSApplication.shared().mainWindow?.frame.size ?? CGSize.zero).width > 300.0 { 
 			return NSColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0)
 			}
 			
@@ -104,12 +105,13 @@ public class S {
 		}
 	}
 //MARK: - FooView
-	public static let FooView = FooViewAppearanceProxy()
-	public class FooViewAppearanceProxy {
+	open static let FooView = FooViewAppearanceProxy()
+	open class FooViewAppearanceProxy {
+		public init() {}
 
 		//MARK: aPoint 
-		fileprivate var _aPoint: CGPoint?
-		public func aPointProperty() -> CGPoint {
+		public var _aPoint: CGPoint?
+		open func aPointProperty() -> CGPoint {
 			if let override = _aPoint { return override }
 			return CGPoint(x: 10.0, y: 10.0)
 		}
@@ -119,8 +121,8 @@ public class S {
 		}
 
 		//MARK: opaque 
-		fileprivate var _opaque: Bool?
-		public func opaqueProperty() -> Bool {
+		public var _opaque: Bool?
+		open func opaqueProperty() -> Bool {
 			if let override = _opaque { return override }
 			return true
 		}
@@ -130,8 +132,8 @@ public class S {
 		}
 
 		//MARK: textAlignment 
-		fileprivate var _textAlignment: NSTextAlignment?
-		public func textAlignmentProperty() -> NSTextAlignment {
+		public var _textAlignment: NSTextAlignment?
+		open func textAlignmentProperty() -> NSTextAlignment {
 			if let override = _textAlignment { return override }
 			return NSTextAlignment.center
 		}
@@ -141,8 +143,8 @@ public class S {
 		}
 
 		//MARK: aRect 
-		fileprivate var _aRect: CGRect?
-		public func aRectProperty() -> CGRect {
+		public var _aRect: CGRect?
+		open func aRectProperty() -> CGRect {
 			if let override = _aRect { return override }
 			return CGRect(x: 10.0, y: 10.0, width: 100.0, height: 100.0)
 		}
@@ -152,8 +154,8 @@ public class S {
 		}
 
 		//MARK: font 
-		fileprivate var _font: NSFont?
-		public func fontProperty() -> NSFont {
+		public var _font: NSFont?
+		open func fontProperty() -> NSFont {
 			if let override = _font { return override }
 			return Typography.smallProperty()
 		}
@@ -163,8 +165,8 @@ public class S {
 		}
 
 		//MARK: aSize 
-		fileprivate var _aSize: CGSize?
-		public func aSizeProperty() -> CGSize {
+		public var _aSize: CGSize?
+		open func aSizeProperty() -> CGSize {
 			if let override = _aSize { return override }
 			return CGSize(width: 100.0, height: 100.0)
 		}
@@ -174,8 +176,8 @@ public class S {
 		}
 
 		//MARK: image 
-		fileprivate var _image: NSImage?
-		public func imageProperty() -> NSImage {
+		public var _image: NSImage?
+		open func imageProperty() -> NSImage {
 			if let override = _image { return override }
 			return NSImage(named: "myimage")!
 		}
@@ -185,8 +187,8 @@ public class S {
 		}
 
 		//MARK: margin 
-		fileprivate var _margin: CGFloat?
-		public func marginProperty() -> CGFloat {
+		public var _margin: CGFloat?
+		open func marginProperty() -> CGFloat {
 			if let override = _margin { return override }
 			return CGFloat(12.0)
 		}
@@ -196,33 +198,4 @@ public class S {
 		}
 	}
 
-}
-extension DefaultButton: AppearaceProxyComponent {
-
-	public typealias ApperanceProxyType = S.DefaultButtonAppearanceProxy
-	public var appearanceProxy: ApperanceProxyType {
-		get {
-			guard let proxy = objc_getAssociatedObject(self, &__ApperanceProxyHandle) as? ApperanceProxyType else { return S.DefaultButton }
-			return proxy
-		}
-		set {
-			objc_setAssociatedObject(self, &__ApperanceProxyHandle, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-			didChangeAppearanceProxy()
-		}
-	}
-}
-
-extension FooView: AppearaceProxyComponent {
-
-	public typealias ApperanceProxyType = S.FooViewAppearanceProxy
-	public var appearanceProxy: ApperanceProxyType {
-		get {
-			guard let proxy = objc_getAssociatedObject(self, &__ApperanceProxyHandle) as? ApperanceProxyType else { return S.FooView }
-			return proxy
-		}
-		set {
-			objc_setAssociatedObject(self, &__ApperanceProxyHandle, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-			didChangeAppearanceProxy()
-		}
-	}
 }
