@@ -115,20 +115,20 @@ You can integrate **S** in your build phases by adding it as a build script.
 - Click on your **TARGET** abd go the **Build Phases** tab.
 - Click on the **+** and select **New Run Script Phase** 
 
-![GitHub Logo](Doc/screen_1.jpg)
+![GitHub Logo](docs/screen_1.jpg)
 
 - Expand the **Run script** section
 - Add `sgen $SRCROOT` in the script
 
-![GitHub Logo](Doc/screen_2.jpg)
+![GitHub Logo](docs/screen_2.jpg)
 
 - Now you can create your `.yml` stylesheet. Make sure it is placed inside your project source root (`$SRCROOT`)
 
-![GitHub Logo](Doc/screen_3.jpg)
+![GitHub Logo](docs/screen_3.jpg)
 
 - The first time you build your target (with `cmd + B`) drag the generated file inside the project. The generated swift file sits next to your stylesheet so, simply right click on your yaml stylesheet, select **Show in Finder** and drag the  `*.generated.swift` file inside your project
 
-![GitHub Logo](Doc/screen_4.jpg)
+![GitHub Logo](docs/screen_4.jpg)
 
 - Et voilà! Every time you will build your target the generated file will be updated as well.
 

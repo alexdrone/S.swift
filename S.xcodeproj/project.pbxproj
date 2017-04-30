@@ -8,12 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		164602301C77334800FC9992 /* Generatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1646022F1C77334800FC9992 /* Generatable.swift */; };
+		164CA2841EB5E44D0014ED69 /* Style.yml in Resources */ = {isa = PBXBuildFile; fileRef = 164CA2811EB5E44D0014ED69 /* Style.yml */; };
 		164DC70A1C7F565900859EC0 /* Rhs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16AC371B1C78C69B00F61BE9 /* Rhs.swift */; };
 		164DC70D1C7F568C00859EC0 /* Generator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F8FAE41C78D9F40055BA8F /* Generator.swift */; };
 		164DC70E1C7F569100859EC0 /* Yaml.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F9E05A1C772B080083C55D /* Yaml.swift */; };
 		164DC70F1C7F569B00859EC0 /* Generatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1646022F1C77334800FC9992 /* Generatable.swift */; };
 		164DC7101C7F571600859EC0 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16AC37191C7772EE00F61BE9 /* Utils.swift */; };
-		166FCA171EB5DCB0008EF0DF /* Style.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168354451C808BCB008EA29F /* Style.generated.swift */; };
 		168354431C808BA8008EA29F /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168354421C808BA8008EA29F /* Condition.swift */; };
 		168354441C808BA8008EA29F /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168354421C808BA8008EA29F /* Condition.swift */; };
 		16AC371A1C7772EE00F61BE9 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16AC37191C7772EE00F61BE9 /* Utils.swift */; };
@@ -38,9 +38,9 @@
 
 /* Begin PBXFileReference section */
 		1646022F1C77334800FC9992 /* Generatable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Generatable.swift; sourceTree = "<group>"; };
-		1646B9D51C806BD700970AD0 /* Style.yml */ = {isa = PBXFileReference; lastKnownFileType = text; name = Style.yml; path = Test/Style.yml; sourceTree = SOURCE_ROOT; };
+		164CA2801EB5E44D0014ED69 /* Style.generated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Style.generated.swift; sourceTree = "<group>"; };
+		164CA2811EB5E44D0014ED69 /* Style.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Style.yml; sourceTree = "<group>"; };
 		168354421C808BA8008EA29F /* Condition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
-		168354451C808BCB008EA29F /* Style.generated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Style.generated.swift; path = Test/Style.generated.swift; sourceTree = SOURCE_ROOT; };
 		16AC37191C7772EE00F61BE9 /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		16AC371B1C78C69B00F61BE9 /* Rhs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rhs.swift; sourceTree = "<group>"; };
 		16F8FAE41C78D9F40055BA8F /* Generator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Generator.swift; sourceTree = "<group>"; };
@@ -70,13 +70,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1646B9D41C806BBF00970AD0 /* test */ = {
+		164CA27E1EB5E44D0014ED69 /* tests */ = {
 			isa = PBXGroup;
 			children = (
-				168354451C808BCB008EA29F /* Style.generated.swift */,
-				1646B9D51C806BD700970AD0 /* Style.yml */,
+				164CA2801EB5E44D0014ED69 /* Style.generated.swift */,
+				164CA2811EB5E44D0014ED69 /* Style.yml */,
 			);
-			name = test;
+			path = tests;
 			sourceTree = "<group>";
 		};
 		16F9E02B1C772AAC0083C55D = {
@@ -84,6 +84,7 @@
 			children = (
 				16F9E0371C772AAC0083C55D /* src */,
 				16F9E0541C772AD30083C55D /* gen */,
+				164CA27E1EB5E44D0014ED69 /* tests */,
 				16F9E0361C772AAC0083C55D /* products */,
 			);
 			sourceTree = "<group>";
@@ -109,18 +110,15 @@
 				16F9E0381C772AAC0083C55D /* S.h */,
 				16F9E03A1C772AAC0083C55D /* Info.plist */,
 			);
-			name = src;
-			path = Swatch;
+			path = src;
 			sourceTree = "<group>";
 		};
 		16F9E0541C772AD30083C55D /* gen */ = {
 			isa = PBXGroup;
 			children = (
-				1646B9D41C806BBF00970AD0 /* test */,
 				16F9E0551C772AD30083C55D /* main.swift */,
 			);
-			name = gen;
-			path = SwatchGenerator;
+			path = gen;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -216,6 +214,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				164CA2841EB5E44D0014ED69 /* Style.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,7 +246,6 @@
 				16F9E05B1C772B080083C55D /* Yaml.swift in Sources */,
 				16AC371A1C7772EE00F61BE9 /* Utils.swift in Sources */,
 				16F8FAE51C78D9F40055BA8F /* Generator.swift in Sources */,
-				166FCA171EB5DCB0008EF0DF /* Style.generated.swift in Sources */,
 				16AC371C1C78C69B00F61BE9 /* Rhs.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -373,7 +371,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Swatch/Info.plist;
+				INFOPLIST_FILE = src/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.au.S;
@@ -392,7 +390,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Swatch/Info.plist;
+				INFOPLIST_FILE = src/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.au.S;
