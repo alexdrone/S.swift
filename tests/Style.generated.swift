@@ -48,7 +48,7 @@ public class S {
 			get { return self.backgroundColorProperty() }
 			set { _backgroundColor = newValue }
 		}
-		public func apply(view: UIView) {
+		public func apply(view: NSView) {
 			view.backgroundColor = self.backgroundColor
 		}
 

@@ -9,7 +9,7 @@ Typography:
   small: font(System, 12)
   medium: font(System-Semibold, 18)
 
-Blue for UIView:
+__protocol__ Blue for NSView:
   backgroundColor: $Color.blue
 
 __appearance_proxy__ DefaultButton extends FooView:
@@ -17,7 +17,7 @@ __appearance_proxy__ DefaultButton extends FooView:
   opaque: false
   color: $Color.blue
 
-__appearance_proxy__ FooView for FooView:
+__appearance_proxy__ FooView for Self:
   margin: 12
   opaque: true
   font: $Typography.small
