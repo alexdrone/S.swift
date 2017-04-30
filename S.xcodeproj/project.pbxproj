@@ -232,7 +232,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SRCROOT/sgen $SRCROOT --platform osx --extensions public\n";
+			shellScript = "$SRCROOT/sgen $SRCROOT --platform osx\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

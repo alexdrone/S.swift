@@ -34,6 +34,25 @@ public class S {
 			set { _medium = newValue }
 		}
 	}
+//MARK: - Blue
+	public static let Blue = BlueAppearanceProxy()
+	public class BlueAppearanceProxy {
+
+		//MARK: backgroundColor 
+		fileprivate var _backgroundColor: NSColor?
+		public func backgroundColorProperty() -> NSColor {
+			if let override = _backgroundColor { return override }
+			return Color.blueProperty()
+		}
+		public var backgroundColor: NSColor {
+			get { return self.backgroundColorProperty() }
+			set { _backgroundColor = newValue }
+		}
+		public func apply(view: UIView) {
+			view.backgroundColor = self.backgroundColor
+		}
+
+	}
 //MARK: - Color
 	public static let Color = ColorAppearanceProxy()
 	public class ColorAppearanceProxy {
@@ -95,13 +114,12 @@ public class S {
 		}
 	}
 //MARK: - FooView
-	open static let FooView = FooViewAppearanceProxy()
-	open class FooViewAppearanceProxy {
-		public init() {}
+	public static let FooView = FooViewAppearanceProxy()
+	public class FooViewAppearanceProxy {
 
 		//MARK: aPoint 
-		public var _aPoint: CGPoint?
-		open func aPointProperty() -> CGPoint {
+		fileprivate var _aPoint: CGPoint?
+		public func aPointProperty() -> CGPoint {
 			if let override = _aPoint { return override }
 			return CGPoint(x: 10.0, y: 10.0)
 		}
@@ -111,8 +129,8 @@ public class S {
 		}
 
 		//MARK: opaque 
-		public var _opaque: Bool?
-		open func opaqueProperty() -> Bool {
+		fileprivate var _opaque: Bool?
+		public func opaqueProperty() -> Bool {
 			if let override = _opaque { return override }
 			return true
 		}
@@ -122,8 +140,8 @@ public class S {
 		}
 
 		//MARK: textAlignment 
-		public var _textAlignment: NSTextAlignment?
-		open func textAlignmentProperty() -> NSTextAlignment {
+		fileprivate var _textAlignment: NSTextAlignment?
+		public func textAlignmentProperty() -> NSTextAlignment {
 			if let override = _textAlignment { return override }
 			return NSTextAlignment.center
 		}
@@ -133,8 +151,8 @@ public class S {
 		}
 
 		//MARK: aRect 
-		public var _aRect: CGRect?
-		open func aRectProperty() -> CGRect {
+		fileprivate var _aRect: CGRect?
+		public func aRectProperty() -> CGRect {
 			if let override = _aRect { return override }
 			return CGRect(x: 10.0, y: 10.0, width: 100.0, height: 100.0)
 		}
@@ -144,8 +162,8 @@ public class S {
 		}
 
 		//MARK: font 
-		public var _font: NSFont?
-		open func fontProperty() -> NSFont {
+		fileprivate var _font: NSFont?
+		public func fontProperty() -> NSFont {
 			if let override = _font { return override }
 			return Typography.smallProperty()
 		}
@@ -155,8 +173,8 @@ public class S {
 		}
 
 		//MARK: aSize 
-		public var _aSize: CGSize?
-		open func aSizeProperty() -> CGSize {
+		fileprivate var _aSize: CGSize?
+		public func aSizeProperty() -> CGSize {
 			if let override = _aSize { return override }
 			return CGSize(width: 100.0, height: 100.0)
 		}
@@ -166,8 +184,8 @@ public class S {
 		}
 
 		//MARK: image 
-		public var _image: NSImage?
-		open func imageProperty() -> NSImage {
+		fileprivate var _image: NSImage?
+		public func imageProperty() -> NSImage {
 			if let override = _image { return override }
 			return NSImage(named: "myimage")!
 		}
@@ -177,8 +195,8 @@ public class S {
 		}
 
 		//MARK: margin 
-		public var _margin: CGFloat?
-		open func marginProperty() -> CGFloat {
+		fileprivate var _margin: CGFloat?
+		public func marginProperty() -> CGFloat {
 			if let override = _margin { return override }
 			return CGFloat(12.0)
 		}
@@ -186,6 +204,17 @@ public class S {
 			get { return self.marginProperty() }
 			set { _margin = newValue }
 		}
+		public func apply(view: FooView) {
+			view.aPoint = self.aPoint
+			view.opaque = self.opaque
+			view.textAlignment = self.textAlignment
+			view.aRect = self.aRect
+			view.font = self.font
+			view.aSize = self.aSize
+			view.image = self.image
+			view.margin = self.margin
+		}
+
 	}
 
 }

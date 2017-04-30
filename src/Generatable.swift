@@ -395,6 +395,8 @@ class Style {
   let properties: [Property]
   var isExtension = false
   var isOverridable = false
+  var isApplicable = false
+  var viewClass: String = "UIView"
 
   init(name: String, properties: [Property]) {
 
@@ -404,21 +406,38 @@ class Style {
     let extensionPrefix = "__appearance_proxy__"
     if styleName.contains(extensionPrefix) {
       styleName = styleName.replacingOccurrences(of: extensionPrefix, with: "")
-      self.isExtension = true
+      isExtension = true
     }
     let openPrefix = "__open__"
     if styleName.contains(openPrefix) {
       styleName = styleName.replacingOccurrences(of: openPrefix, with: "")
-      self.isOverridable = true
+      isOverridable = true
+    }
+    let protocolPrefix = "__protocol__"
+    if styleName.contains(protocolPrefix) {
+      styleName = styleName.replacingOccurrences(of: protocolPrefix, with: "")
+    }
+    let applicableSelfPrefix = "for Self"
+    if styleName.contains(applicableSelfPrefix) {
+      styleName = styleName.replacingOccurrences(of: applicableSelfPrefix, with: "")
+      isApplicable = true
     }
     // Trims spaces
     styleName = styleName.replacingOccurrences(of: " ", with: "")
+
+    // Superclass defined.
+    if let components = Optional(styleName.components(separatedBy: "for")), components.count == 2 {
+      styleName = components[0].replacingOccurrences(of: " ", with: "")
+      viewClass = components[1].replacingOccurrences(of: " ", with: "")
+      isApplicable = true
+    }
+
     // Superclass defined.
     if let components = Optional(styleName.components(separatedBy: "extends")), components.count == 2 {
       styleName = components[0].replacingOccurrences(of: " ", with: "")
-      self.superclassName = components[1].replacingOccurrences(of: " ", with: "")
+      superclassName = components[1].replacingOccurrences(of: " ", with: "")
     }
-    if self.isOverridable {
+    if isOverridable {
       properties.forEach({ $0.isOverridable = true })
     }
 
@@ -448,6 +467,14 @@ extension Style: Generatable {
     }
     for property in properties {
       wrapper += property.generate()
+    }
+
+    if isApplicable {
+      wrapper += "\n\t\tpublic func apply(view: \(isExtension ? self.name : self.viewClass)) {"
+      for property in properties {
+        wrapper += "\n\t\t\tview.\(property.key) = self.\(property.key)"
+      }
+      wrapper += "\n\t\t}\n"
     }
     wrapper += "\n\t}\n"
     return wrapper

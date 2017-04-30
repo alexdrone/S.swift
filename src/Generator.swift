@@ -3,7 +3,7 @@ import Foundation
 public struct Configuration {
   public static var objcGeneration = false
   public static var extensionsEnabled = false
-  public static var publicExtensions = false
+  public static var publicExtensions = true
   public static var appExtensionApiOnly = false
   public static var targetOsx = false
   public static var singleFile: String?
