@@ -9,15 +9,15 @@ Typography:
   small: font(System, 12)
   medium: font(System-Semibold, 18)
 
-__protocol__ Blue for NSView:
+@style Blue for NSView:
   backgroundColor: $Color.blue
 
-__appearance_proxy__ DefaultButton extends FooView:
+@appearance_proxy DefaultButton extends FooView:
   margin: 12
   opaque: false
   color: $Color.blue
 
-__appearance_proxy__ FooView for Self:
+@appearance_proxy @open FooView for Self:
   margin: 12
   opaque: true
   font: $Typography.small
@@ -26,3 +26,4 @@ __appearance_proxy__ FooView for Self:
   aPoint: Point(10,10)
   aSize: Size(100,100)
   aRect: Rect(10,10,100,100)
+  compound.property: 10

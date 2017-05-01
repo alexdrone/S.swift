@@ -347,7 +347,7 @@ class Property {
 
   init(key: String, rhs: RhsValue) {
     self.rhs = rhs
-    self.key = key
+    self.key = key.replacingOccurrences(of: ".", with: "_")
   }
 }
 
@@ -403,17 +403,17 @@ class Style {
     var styleName = name.trimmingCharacters(in: CharacterSet.whitespaces)
 
     // Check if this could generate an extension.
-    let extensionPrefix = "__appearance_proxy__"
+    let extensionPrefix = "__appearance_proxy"
     if styleName.contains(extensionPrefix) {
       styleName = styleName.replacingOccurrences(of: extensionPrefix, with: "")
       isExtension = true
     }
-    let openPrefix = "__open__"
+    let openPrefix = "__open"
     if styleName.contains(openPrefix) {
       styleName = styleName.replacingOccurrences(of: openPrefix, with: "")
       isOverridable = true
     }
-    let protocolPrefix = "__protocol__"
+    let protocolPrefix = "__style"
     if styleName.contains(protocolPrefix) {
       styleName = styleName.replacingOccurrences(of: protocolPrefix, with: "")
     }
@@ -472,7 +472,9 @@ extension Style: Generatable {
     if isApplicable {
       wrapper += "\n\t\tpublic func apply(view: \(isExtension ? self.name : self.viewClass)) {"
       for property in properties {
-        wrapper += "\n\t\t\tview.\(property.key) = self.\(property.key)"
+        wrapper +=
+            "\n\t\t\tview.\(property.key.replacingOccurrences(of: "_", with: "."))"
+            + " = self.\(property.key)"
       }
       wrapper += "\n\t\t}\n"
     }

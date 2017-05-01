@@ -32,6 +32,7 @@ public struct Generator: Generatable  {
     var string = ""
     do {
       string = try String(contentsOf: url)
+      string = string.replacingOccurrences(of: "@", with: "__")
     } catch {
       throw GeneratorError.fileDoesNotExist(error: "File \(url) not found.")
     }

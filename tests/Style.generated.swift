@@ -5,9 +5,134 @@
 
 import Cocoa
 
+fileprivate var __ApperanceProxyHandle: UInt8 = 0
+
+/// Your view should conform to 'AppearaceProxyComponent'.
+public protocol AppearaceProxyComponent: class {
+	associatedtype ApperanceProxyType
+	var appearanceProxy: ApperanceProxyType { get }
+	func didChangeAppearanceProxy()
+}
+
 /// Entry point for the app stylesheet
 public class S {
 
+//MARK: - FooView
+	open static let FooView = FooViewAppearanceProxy()
+	open class FooViewAppearanceProxy {
+		public init() {}
+
+		//MARK: aPoint 
+		public var _aPoint: CGPoint?
+		open func aPointProperty() -> CGPoint {
+			if let override = _aPoint { return override }
+			return CGPoint(x: 10.0, y: 10.0)
+		}
+		public var aPoint: CGPoint {
+			get { return self.aPointProperty() }
+			set { _aPoint = newValue }
+		}
+
+		//MARK: compound_property 
+		public var _compound_property: CGFloat?
+		open func compound_propertyProperty() -> CGFloat {
+			if let override = _compound_property { return override }
+			return CGFloat(10.0)
+		}
+		public var compound_property: CGFloat {
+			get { return self.compound_propertyProperty() }
+			set { _compound_property = newValue }
+		}
+
+		//MARK: opaque 
+		public var _opaque: Bool?
+		open func opaqueProperty() -> Bool {
+			if let override = _opaque { return override }
+			return true
+		}
+		public var opaque: Bool {
+			get { return self.opaqueProperty() }
+			set { _opaque = newValue }
+		}
+
+		//MARK: textAlignment 
+		public var _textAlignment: NSTextAlignment?
+		open func textAlignmentProperty() -> NSTextAlignment {
+			if let override = _textAlignment { return override }
+			return NSTextAlignment.center
+		}
+		public var textAlignment: NSTextAlignment {
+			get { return self.textAlignmentProperty() }
+			set { _textAlignment = newValue }
+		}
+
+		//MARK: aRect 
+		public var _aRect: CGRect?
+		open func aRectProperty() -> CGRect {
+			if let override = _aRect { return override }
+			return CGRect(x: 10.0, y: 10.0, width: 100.0, height: 100.0)
+		}
+		public var aRect: CGRect {
+			get { return self.aRectProperty() }
+			set { _aRect = newValue }
+		}
+
+		//MARK: font 
+		public var _font: NSFont?
+		open func fontProperty() -> NSFont {
+			if let override = _font { return override }
+			return Typography.smallProperty()
+		}
+		public var font: NSFont {
+			get { return self.fontProperty() }
+			set { _font = newValue }
+		}
+
+		//MARK: aSize 
+		public var _aSize: CGSize?
+		open func aSizeProperty() -> CGSize {
+			if let override = _aSize { return override }
+			return CGSize(width: 100.0, height: 100.0)
+		}
+		public var aSize: CGSize {
+			get { return self.aSizeProperty() }
+			set { _aSize = newValue }
+		}
+
+		//MARK: image 
+		public var _image: NSImage?
+		open func imageProperty() -> NSImage {
+			if let override = _image { return override }
+			return NSImage(named: "myimage")!
+		}
+		public var image: NSImage {
+			get { return self.imageProperty() }
+			set { _image = newValue }
+		}
+
+		//MARK: margin 
+		public var _margin: CGFloat?
+		open func marginProperty() -> CGFloat {
+			if let override = _margin { return override }
+			return CGFloat(12.0)
+		}
+		public var margin: CGFloat {
+			get { return self.marginProperty() }
+			set { _margin = newValue }
+		}
+		public func apply(view: FooView) {
+			view.aPoint = self.aPoint
+			view.compound.property = self.compound_property
+			view.opaque = self.opaque
+			view.textAlignment = self.textAlignment
+			view.aRect = self.aRect
+			view.font = self.font
+			view.aSize = self.aSize
+			view.image = self.image
+			view.margin = self.margin
+		}
+
+	}
 //MARK: - Typography
 	public static let Typography = TypographyAppearanceProxy()
 	public class TypographyAppearanceProxy {
@@ -113,108 +238,34 @@ public class S {
 			return CGFloat(12.0)
 		}
 	}
-//MARK: - FooView
-	public static let FooView = FooViewAppearanceProxy()
-	public class FooViewAppearanceProxy {
 
-		//MARK: aPoint 
-		fileprivate var _aPoint: CGPoint?
-		public func aPointProperty() -> CGPoint {
-			if let override = _aPoint { return override }
-			return CGPoint(x: 10.0, y: 10.0)
-		}
-		public var aPoint: CGPoint {
-			get { return self.aPointProperty() }
-			set { _aPoint = newValue }
-		}
+}
+extension FooView: AppearaceProxyComponent {
 
-		//MARK: opaque 
-		fileprivate var _opaque: Bool?
-		public func opaqueProperty() -> Bool {
-			if let override = _opaque { return override }
-			return true
+	public typealias ApperanceProxyType = S.FooViewAppearanceProxy
+	public var appearanceProxy: ApperanceProxyType {
+		get {
+			guard let proxy = objc_getAssociatedObject(self, &__ApperanceProxyHandle) as? ApperanceProxyType else { return S.FooView }
+			return proxy
 		}
-		public var opaque: Bool {
-			get { return self.opaqueProperty() }
-			set { _opaque = newValue }
+		set {
+			objc_setAssociatedObject(self, &__ApperanceProxyHandle, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+			didChangeAppearanceProxy()
 		}
-
-		//MARK: textAlignment 
-		fileprivate var _textAlignment: NSTextAlignment?
-		public func textAlignmentProperty() -> NSTextAlignment {
-			if let override = _textAlignment { return override }
-			return NSTextAlignment.center
-		}
-		public var textAlignment: NSTextAlignment {
-			get { return self.textAlignmentProperty() }
-			set { _textAlignment = newValue }
-		}
-
-		//MARK: aRect 
-		fileprivate var _aRect: CGRect?
-		public func aRectProperty() -> CGRect {
-			if let override = _aRect { return override }
-			return CGRect(x: 10.0, y: 10.0, width: 100.0, height: 100.0)
-		}
-		public var aRect: CGRect {
-			get { return self.aRectProperty() }
-			set { _aRect = newValue }
-		}
-
-		//MARK: font 
-		fileprivate var _font: NSFont?
-		public func fontProperty() -> NSFont {
-			if let override = _font { return override }
-			return Typography.smallProperty()
-		}
-		public var font: NSFont {
-			get { return self.fontProperty() }
-			set { _font = newValue }
-		}
-
-		//MARK: aSize 
-		fileprivate var _aSize: CGSize?
-		public func aSizeProperty() -> CGSize {
-			if let override = _aSize { return override }
-			return CGSize(width: 100.0, height: 100.0)
-		}
-		public var aSize: CGSize {
-			get { return self.aSizeProperty() }
-			set { _aSize = newValue }
-		}
-
-		//MARK: image 
-		fileprivate var _image: NSImage?
-		public func imageProperty() -> NSImage {
-			if let override = _image { return override }
-			return NSImage(named: "myimage")!
-		}
-		public var image: NSImage {
-			get { return self.imageProperty() }
-			set { _image = newValue }
-		}
-
-		//MARK: margin 
-		fileprivate var _margin: CGFloat?
-		public func marginProperty() -> CGFloat {
-			if let override = _margin { return override }
-			return CGFloat(12.0)
-		}
-		public var margin: CGFloat {
-			get { return self.marginProperty() }
-			set { _margin = newValue }
-		}
-		public func apply(view: FooView) {
-			view.aPoint = self.aPoint
-			view.opaque = self.opaque
-			view.textAlignment = self.textAlignment
-			view.aRect = self.aRect
-			view.font = self.font
-			view.aSize = self.aSize
-			view.image = self.image
-			view.margin = self.margin
-		}
-
 	}
+}
 
+extension DefaultButton: AppearaceProxyComponent {
+
+	public typealias ApperanceProxyType = S.DefaultButtonAppearanceProxy
+	public var appearanceProxy: ApperanceProxyType {
+		get {
+			guard let proxy = objc_getAssociatedObject(self, &__ApperanceProxyHandle) as? ApperanceProxyType else { return S.DefaultButton }
+			return proxy
+		}
+		set {
+			objc_setAssociatedObject(self, &__ApperanceProxyHandle, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+			didChangeAppearanceProxy()
+		}
+	}
 }

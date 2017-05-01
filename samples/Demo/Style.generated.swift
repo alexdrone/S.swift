@@ -5,6 +5,15 @@
 
 import Cocoa
 
+fileprivate var __ApperanceProxyHandle: UInt8 = 0
+
+/// Your view should conform to 'AppearaceProxyComponent'.
+public protocol AppearaceProxyComponent: class {
+	associatedtype ApperanceProxyType
+	var appearanceProxy: ApperanceProxyType { get }
+	func didChangeAppearanceProxy()
+}
+
 /// Entry point for the app stylesheet
 public class S {
 
@@ -34,9 +43,9 @@ public class S {
 			set { _medium = newValue }
 		}
 	}
-//MARK: - FooView
-	public static let FooView = FooViewAppearanceProxy()
-	public class FooViewAppearanceProxy {
+//MARK: - __FooView
+	public static let __FooView = __FooViewAppearanceProxy()
+	public class __FooViewAppearanceProxy {
 
 		//MARK: backgroundColor 
 		fileprivate var _backgroundColor: NSColor?
@@ -128,16 +137,40 @@ public class S {
 		}
 
 		//MARK: opaque 
-		override public func opaqueProperty() -> Bool {
+		fileprivate var _opaque: Bool?
+		public func opaqueProperty() -> Bool {
 			if let override = _opaque { return override }
 			return false
 		}
+		public var opaque: Bool {
+			get { return self.opaqueProperty() }
+			set { _opaque = newValue }
+		}
 
 		//MARK: margin 
-		override public func marginProperty() -> CGFloat {
+		fileprivate var _margin: CGFloat?
+		public func marginProperty() -> CGFloat {
 			if let override = _margin { return override }
 			return CGFloat(12.0)
 		}
+		public var margin: CGFloat {
+			get { return self.marginProperty() }
+			set { _margin = newValue }
+		}
 	}
 
+}
+extension __FooView: AppearaceProxyComponent {
+
+	public typealias ApperanceProxyType = S.__FooViewAppearanceProxy
+	public var appearanceProxy: ApperanceProxyType {
+		get {
+			guard let proxy = objc_getAssociatedObject(self, &__ApperanceProxyHandle) as? ApperanceProxyType else { return S.__FooView }
+			return proxy
+		}
+		set {
+			objc_setAssociatedObject(self, &__ApperanceProxyHandle, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+			didChangeAppearanceProxy()
+		}
+	}
 }

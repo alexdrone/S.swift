@@ -232,7 +232,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SRCROOT/sgen $SRCROOT --platform osx\n";
+			shellScript = "$SRCROOT/sgen $SRCROOT --platform osx --appearance_proxy\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
